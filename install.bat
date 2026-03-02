@@ -6,7 +6,7 @@ echo    Akki OS - Personal Branding Operating System
 echo ===================================================
 echo.
 
-echo [1/4] Checking Node.js...
+echo [1/5] Checking Node.js...
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo ERROR: Node.js not found! Install from: https://nodejs.org
@@ -15,7 +15,7 @@ if %errorlevel% neq 0 (
 )
 echo OK: Node.js ready
 
-echo [2/4] Checking Docker...
+echo [2/5] Checking Docker...
 docker --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo ERROR: Docker not found! Install from: https://docker.com
@@ -26,7 +26,7 @@ if %errorlevel% neq 0 (
 echo OK: Docker ready
 
 echo.
-echo [3/4] Installing OpenClaw...
+echo [3/5] Installing OpenClaw...
 call npm install -g openclaw >nul 2>&1
 echo OK: OpenClaw installed
 
@@ -46,7 +46,9 @@ if not exist .env (
 ) else (
     echo OK: Found existing .env, loading...
     for /f "usebackq tokens=1,2 delims==" %%a in (".env") do (
-        if "%%a"=="OPENCLAW_TOKEN" set OPENCLAW_TOKEN=%%b
+        if "%%a"=="OPENCLAW_TOKEN"    set OPENCLAW_TOKEN=%%b
+        if "%%a"=="CONVEX_URL"        set CONVEX_URL=%%b
+        if "%%a"=="CONVEX_DEPLOY_KEY" set CONVEX_DEPLOY_KEY=%%b
     )
 )
 
@@ -56,7 +58,7 @@ echo.
 call npx openclaw onboard --workspace %~dp0workspace --gateway-bind loopback --install-daemon --gateway-token "!OPENCLAW_TOKEN!"
 
 echo.
-echo [4/4] Setting up Agents + Skills + Webhook + Mission Control...
+echo [4/5] Setting up Agents + Skills + Webhook + Mission Control...
 
 REM Register agents
 for %%a in (jarvis fury loki shuri atlas echo oracle pulse vision) do (
@@ -77,24 +79,72 @@ start "Webhook Server" cmd /k "node server.js"
 cd %~dp0
 echo OK: Webhook started
 
-REM Mission Control
+REM Mission Control clone
 if not exist %~dp0mission_control (
     git clone https://github.com/Chiraggoyal120/mission_control.git %~dp0mission_control
+    echo OK: Mission Control cloned
 )
+
 cd %~dp0mission_control
 if not exist .env (
     (
         echo FRONTEND_PORT=3000
         echo BACKEND_PORT=8000
         echo CORS_ORIGINS=http://localhost:3000
+        echo CORS_ORIGIN=http://localhost:3000
         echo AUTH_MODE=local
         echo LOCAL_AUTH_TOKEN=!OPENCLAW_TOKEN!
+        echo OPENCLAW_TOKEN=!OPENCLAW_TOKEN!
+        echo OPENCLAW_GATEWAY_URL=ws://127.0.0.1:18789
         echo NEXT_PUBLIC_API_URL=http://localhost:8000
     ) > .env
 )
+
 docker compose -f compose.yml --env-file .env up -d --build
 cd %~dp0
 echo OK: Mission Control started!
+
+echo.
+echo [5/5] Setting up Convex Database...
+echo ===================================================
+echo    FREE database for your AI agents
+echo    Create account at: https://convex.dev
+echo    Then: New Project ^> Settings ^> Deploy Keys
+echo ===================================================
+echo.
+
+if "!CONVEX_URL!"=="" (
+    set /p CONVEX_URL="Enter Convex Cloud URL (https://xxx.convex.cloud): "
+)
+if "!CONVEX_DEPLOY_KEY!"=="" (
+    set /p CONVEX_DEPLOY_KEY="Enter Convex Deploy Key (dev:xxx|yyy): "
+)
+
+REM Save to both .env files
+echo CONVEX_URL=!CONVEX_URL!>> %~dp0.env
+echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> %~dp0.env
+echo CONVEX_URL=!CONVEX_URL!>> %~dp0mission_control\.env
+echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> %~dp0mission_control\.env
+
+REM Deploy Convex schema
+if not "!CONVEX_URL!"=="" (
+    if not "!CONVEX_DEPLOY_KEY!"=="" (
+        echo.
+        echo    Deploying Convex schema to cloud...
+        cd %~dp0mission_control\backend
+        set CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!
+        call npx convex deploy
+        if %errorlevel% neq 0 (
+            echo WARN: Convex deploy failed. Run manually later:
+            echo       cd mission_control\backend ^&^& npx convex deploy
+        ) else (
+            echo OK: Convex deployed!
+        )
+        cd %~dp0
+    )
+) else (
+    echo SKIP: Convex setup skipped. Add CONVEX_URL to .env later.
+)
 
 echo.
 echo ===================================================
@@ -103,6 +153,7 @@ echo ===================================================
 echo.
 echo OpenClaw:        http://127.0.0.1:18789/?token=!OPENCLAW_TOKEN!
 echo Mission Control: http://localhost:3000  (Login: !OPENCLAW_TOKEN!)
+echo Convex DB:       !CONVEX_URL!
 echo.
 echo Next Step: Open Telegram and message your bot!
 echo Your AI will guide you through the rest.
