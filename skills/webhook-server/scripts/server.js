@@ -21,7 +21,7 @@ async function getConvex() {
       convexApi = require('../../../convex/_generated/api');
     }
     return { client: convexClient, api: convexApi.api };
-  } catch(e) {
+  } catch (e) {
     console.log('Convex init error:', e.message);
     return null;
   }
@@ -39,7 +39,7 @@ function updateEnvFile(filePath, key, value) {
     fs.writeFileSync(filePath, env);
     console.log(`Updated ${key}`);
     return true;
-  } catch(e) {
+  } catch (e) {
     console.log(`Error updating env:`, e.message);
     return false;
   }
@@ -56,7 +56,7 @@ async function forwardToMissionControl(data) {
       },
       body: JSON.stringify(data)
     });
-  } catch(e) {
+  } catch (e) {
     console.log('Mission Control error:', e.message);
   }
 }
@@ -91,7 +91,7 @@ const server = http.createServer(async (req, res) => {
             if (key === 'CONVEX_URL' || key === 'APIFY_TOKEN') {
               try {
                 execSync('docker compose -f ' + path.join(__dirname, '../../../mission_control/compose.yml') + ' --env-file ' + MC_ENV_PATH + ' up -d', { stdio: 'inherit' });
-              } catch(e) {
+              } catch (e) {
                 console.log('Docker restart error:', e.message);
               }
             }
@@ -105,19 +105,29 @@ const server = http.createServer(async (req, res) => {
         // Log activity to Convex
         const convex = await getConvex();
         if (convex) {
-          await convex.client.mutation(convex.api.activity.log, {
-            agent: data.agent || 'main',
-            action: data.action || 'message',
-            message: data.message || body,
-            user_id: data.user_id || null,
-          });
+          if (data.table === 'drafts') {
+            await convex.client.mutation(convex.api.drafts.create, {
+              content: data.content || body,
+              platform: data.platform || 'linkedin',
+              userId: data.user_id || 'system',
+              agent: data.agent || 'system'
+            });
+          } else {
+            // default to activity
+            await convex.client.mutation(convex.api.activity.log, {
+              agent: data.agent || 'main',
+              action: data.action || 'message',
+              message: data.message || body,
+              user_id: data.user_id || 'system',
+            });
+          }
         }
 
         await forwardToMissionControl(data);
 
         res.writeHead(200);
         res.end('OK');
-      } catch(e) {
+      } catch (e) {
         console.log('Error:', e.message);
         res.writeHead(500);
         res.end(e.message);

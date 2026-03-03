@@ -2,10 +2,10 @@
 
 _Learn about the person you're helping. Update this as you go._
 
-- **Name:**
-- **What to call them:**
+- **Name:** Chirag
+- **What to call them:** Chirag
 - **Pronouns:** _(optional)_
-- **Timezone:**
+- **Timezone:** GMT+5:30
 - **Notes:**
 
 ## Context

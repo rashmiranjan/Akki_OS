@@ -1,0 +1,6 @@
+{
+  "agent": "oracle",
+  "action": "task_complete",
+  "message": "Generated 15 ideas based on market pain points (burnout, disconnection, support issues, pricing, onboarding) with validation signals. Saved to database.",
+  "user_id": "default"
+}
