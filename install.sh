@@ -83,6 +83,8 @@ echo "OK: Skills copied"
 # Start webhook — port check pehle
 if ! lsof -i :3003 &> /dev/null; then
     cd "$SCRIPT_DIR/skills/webhook-server/scripts"
+    echo "CONVEX_URL=$CONVEX_URL" > .env
+    echo "OPENCLAW_TOKEN=$OPENCLAW_TOKEN" >> .env
     npm init -y &> /dev/null
     npm install convex dotenv &> /dev/null
     nohup node server.js > "$SCRIPT_DIR/webhook.log" 2>&1 &
@@ -111,14 +113,12 @@ echo ""
 
 if [ -z "$CONVEX_URL" ]; then
     read -p "Enter Convex Cloud URL (https://xxx.convex.cloud): " CONVEX_URL
+    echo "CONVEX_URL=$CONVEX_URL" >> "$SCRIPT_DIR/.env"
 fi
 if [ -z "$CONVEX_DEPLOY_KEY" ]; then
     read -p "Enter Convex Deploy Key (dev:xxx|yyy): " CONVEX_DEPLOY_KEY
+    echo "CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY" >> "$SCRIPT_DIR/.env"
 fi
-
-# Save to root .env
-echo "CONVEX_URL=$CONVEX_URL" >> "$SCRIPT_DIR/.env"
-echo "CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY" >> "$SCRIPT_DIR/.env"
 
 # Mission Control .env — sab values ek saath
 if [ ! -f "$SCRIPT_DIR/mission_control/.env" ]; then

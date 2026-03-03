@@ -75,8 +75,6 @@ REM Start webhook — port check pehle
 netstat -ano | find ":3003" >nul 2>&1
 if %errorlevel% neq 0 (
     cd "%~dp0skills\webhook-server\scripts"
-    (echo CONVEX_URL=!CONVEX_URL!) > .env
-    (echo OPENCLAW_TOKEN=!OPENCLAW_TOKEN!) >> .env
     call npm init -y >nul 2>&1
     call npm install convex dotenv >nul 2>&1
     start "Akki Webhook" /MIN cmd /k "node server.js"
@@ -171,7 +169,8 @@ echo    Mission Control: http://localhost:3000  (Login: !OPENCLAW_TOKEN!)
 echo    Convex DB:       !CONVEX_URL!
 echo    Webhook:         http://localhost:3003
 echo.
-echo Next Step: Open Mission Control and chat with your agents!
+echo Next Step: Open Telegram and message your bot!
+echo Your AI will guide you through the rest.
 echo.
 timeout /t 3 >nul
 start http://localhost:3000
