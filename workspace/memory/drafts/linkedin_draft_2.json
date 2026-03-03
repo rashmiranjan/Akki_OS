@@ -1,0 +1,8 @@
+{
+  "platform": "linkedin",
+  "content": "90% of AI agent implementations fail. Here's why.\n\nFounders treat agents like employees. They hand off a vague task and expect magic.\n\nAI agents need precision, not vision.\n\nMy framework for agent success:\n\nTHE INPUT → OUTPUT CONTRACT\n\n1. Define EXACT input format (JSON schema, CSV columns)\n2. Define EXACT output format (no \"be creative\")\n3. Define the transformation rules (if X, then Y)\n4. Add error handling (what happens when input is bad)\n5. Add human review gates (for high-stakes decisions)\n\nExample: Instead of \"research competitors\", use:\n\"Input: List of 10 competitor URLs. Output: JSON with pricing, feature comparison, and USP in 50 words each.\"\n\nPrecision > Ambiguity.\n\nSystems that work scale. Systems that \"might\" work don't.\n\nWhat's your biggest agent failure?\n\n#AIagents #systems #founders #automation #startupops",
+  "tone": "bold-direct",
+  "topics": ["AI Agents", "frameworks", "implementation", "systems"],
+  "status": "pending",
+  "created_at": "2026-03-04T00:09:00Z"
+}

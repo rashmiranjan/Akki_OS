@@ -1,0 +1,230 @@
+{
+  "agent": "oracle",
+  "action": "save_ideas",
+  "user_id": "chirag",
+  "niche": "AI Agents & Personal Branding",
+  "audience": "Founders & Developers",
+  "goal": "Grow LinkedIn to 10K followers",
+  "ideas": [
+    {
+      "title": "I Built an AI Agent That Handles My LinkedIn Replies. Here's How.",
+      "pillar": "Automation Workflows",
+      "format": "LinkedIn Carousel + Detailed Post",
+      "hook": "My LinkedIn engagement went up 300% while I slept",
+      "cta": "Comment 'AUTOMATION' and I'll send you the prompt template",
+      "why_works": "Technical depth + tangible result (300% engagement)",
+      "priority": "HIGH",
+      "category": "technical",
+      "status": "new"
+    },
+    {
+      "title": "Developers Are Terrible at Personal Branding (And It's Not Their Fault)",
+      "pillar": "Personal Branding for Tech People",
+      "format": "Long-form LinkedIn Post (1000+ words)",
+      "hook": "I coded for 10 years before I realized this...",
+      "cta": "What's your biggest personal branding challenge? Comment below",
+      "why_works": "Validates their pain + reframes branding in dev terms",
+      "priority": "HIGH",
+      "category": "strategy",
+      "status": "new"
+    },
+    {
+      "title": "The AI Agent That Writes My LinkedIn Posts (Live Demo)",
+      "pillar": "AI Agent Implementation",
+      "format": "Video walkthrough + Code snippets",
+      "hook": "Watch me generate a viral post in 2 minutes",
+      "cta": "Want the architecture diagram? Link in comments",
+      "why_works": "Proof of concept + transparency = trust",
+      "priority": "HIGH",
+      "category": "technical",
+      "status": "new"
+    },
+    {
+      "title": "My First 1K LinkedIn Followers: The Exact Numbers",
+      "pillar": "Founder Stories",
+      "format": "Data-driven LinkedIn Post",
+      "hook": "It took 47 days, and here's what I posted",
+      "cta": "Share this with a founder who's struggling with LinkedIn",
+      "why_works": "Hard data is rare in marketing space = authority",
+      "priority": "CRITICAL",
+      "category": "story",
+      "status": "new"
+    },
+    {
+      "title": "AI Agent Architecture: From Idea to Production in 5 Steps",
+      "pillar": "AI Agent Implementation",
+      "format": "Carousel (10 slides)",
+      "hook": "Stop building agents that don't work. Here's the framework",
+      "cta": "Save this carousel for your next agent build",
+      "why_works": "Evergreen framework, devs save for reference",
+      "priority": "HIGH",
+      "category": "framework",
+      "status": "new"
+    },
+    {
+      "title": "Automation ROI: The 3 Workflows That Saved Me 20 Hours/Week",
+      "pillar": "Automation Workflows",
+      "format": "Thread-style LinkedIn Post",
+      "hook": "I got 20 hours of my life back. Here's how",
+      "cta": "Which workflow would you use most? Comment 1, 2, or 3",
+      "why_works": "Clear ROI = practical value for busy founders",
+      "priority": "HIGH",
+      "category": "automation",
+      "status": "new"
+    },
+    {
+      "title": "The Personal Branding Framework That Got Me 5K Developer Followers",
+      "pillar": "Personal Branding for Tech People",
+      "format": "Long-form Post + Downloadable Framework PDF",
+      "hook": "I tried every personal branding tip. Only 3 things mattered",
+      "cta": "Download the framework PDF (link in comments)",
+      "why_works": "Downloadable content = lead magnet + shareable",
+      "priority": "HIGH",
+      "category": "framework",
+      "status": "new"
+    },
+    {
+      "title": "I Fired My VA. This AI Agent Replaced Her (And Does More)",
+      "pillar": "Automation Workflows",
+      "format": "Case Study Post",
+      "hook": "Cost went from $800/month to $50/month",
+      "cta": "Comment 'VA' and I'll show you the workflow diagram",
+      "why_works": "Controversial but honest + clear cost savings",
+      "priority": "HIGH",
+      "category": "story",
+      "status": "new"
+    },
+    {
+      "title": "AI Agents for Founders: The 5 Most Valuable Workflows",
+      "pillar": "Automation Workflows",
+      "format": "Carousel (12 slides)",
+      "hook": "These 5 agents handle 80% of my busywork",
+      "cta": "Save this for when you're drowning in busywork",
+      "why_works": "Actionable + relatable pain points",
+      "priority": "MEDIUM",
+      "category": "automation",
+      "status": "new"
+    },
+    {
+      "title": "How I Got LinkedIn Top Voice in AI Development",
+      "pillar": "Personal Branding for Tech People",
+      "format": "Storytelling Post",
+      "hook": "It wasn't viral posts. It was something else entirely",
+      "cta": "What's your LinkedIn goal? 1K, 5K, or 10K?",
+      "why_works": "Social proof + strategy, not just luck",
+      "priority": "HIGH",
+      "category": "story",
+      "status": "new"
+    },
+    {
+      "title": "Building an AI Agent: The Mistakes I Made (So You Don't Have To)",
+      "pillar": "AI Agent Implementation",
+      "format": "Failures Post (Vulnerability)",
+      "hook": "I spent 3 weeks building an agent that didn't work. Here's why",
+      "cta": "Which mistake have you made? Share in comments",
+      "why_works": "Failure stories outperform success stories",
+      "priority": "MEDIUM",
+      "category": "story",
+      "status": "new"
+    },
+    {
+      "title": "Personal Branding for Introverted Devs (Yes, You Can Do This)",
+      "pillar": "Personal Branding for Tech People",
+      "format": "Empathy-First Post",
+      "hook": "I'm an introvert. I hate talking about myself. Here's what I do",
+      "cta": "Tag an introverted dev who needs to see this",
+      "why_works": "Huge audience (most devs are introverted)",
+      "priority": "HIGH",
+      "category": "strategy",
+      "status": "new"
+    },
+    {
+      "title": "The AI Agent That Reads My Emails and Suggests Replies",
+      "pillar": "AI Agent Implementation",
+      "format": "Technical Tutorial + Code",
+      "hook": "This agent saves me 2 hours of email time daily",
+      "cta": "Comment 'EMAIL' and I'll send you the repo link",
+      "why_works": "Technical depth + open-source feel = dev trust",
+      "priority": "HIGH",
+      "category": "technical",
+      "status": "new"
+    },
+    {
+      "title": "From 100 to 1K LinkedIn Followers: The Content Strategy That Worked",
+      "pillar": "Founder Stories",
+      "format": "Strategy Breakdown",
+      "hook": "I posted 120 times. Here's what I learned",
+      "cta": "What's your current follower count? Comment below",
+      "why_works": "Data-backed, not just opinions",
+      "priority": "HIGH",
+      "category": "strategy",
+      "status": "new"
+    },
+    {
+      "title": "Automation Mindset: Stop Automating the Wrong Things",
+      "pillar": "Automation Workflows",
+      "format": "Opinion Post (Contrarian)",
+      "hook": "I automated my calendar and my productivity went DOWN",
+      "cta": "What did you automate and regret it? Share in comments",
+      "why_works": "Counter-intuitive = engagement + relatable",
+      "priority": "MEDIUM",
+      "category": "strategy",
+      "status": "new"
+    },
+    {
+      "title": "AI Agents vs. Traditional Automation: When to Use Which",
+      "pillar": "AI Agent Implementation",
+      "format": "Comparison Framework",
+      "hook": "Stop using AI when Zapier would work",
+      "cta": "Save this post - it'll save you money",
+      "why_works": "Practical decision framework = saves time + money",
+      "priority": "MEDIUM",
+      "category": "framework",
+      "status": "new"
+    },
+    {
+      "title": "The LinkedIn Algorithm: What Actually Works (Data from My Analytics)",
+      "pillar": "Personal Branding for Tech People",
+      "format": "Algorithm Breakdown",
+      "hook": "I reverse-engineered LinkedIn's algorithm (kind of)",
+      "cta": "Follow for more AI + LinkedIn content",
+      "why_works": "Algorithm secrets always get engagement",
+      "priority": "HIGH",
+      "category": "strategy",
+      "status": "new"
+    },
+    {
+      "title": "I Built an AI Agent to Grow My LinkedIn. Here's the Code",
+      "pillar": "AI Agent Implementation",
+      "format": "Open Source Announcement",
+      "hook": "This agent got me 500 new followers last month",
+      "cta": "Star the repo if you find it useful ⭐",
+      "why_works": "Open source = community + authority",
+      "priority": "CRITICAL",
+      "category": "technical",
+      "status": "new"
+    },
+    {
+      "title": "Personal Branding Mistake: The 'Expert Trap' That Killed My Growth",
+      "pillar": "Personal Branding for Tech People",
+      "format": "Vulnerability Post",
+      "hook": "I tried to sound like an expert for 3 months. Nobody cared",
+      "cta": "Are you falling into the expert trap? Be honest",
+      "why_works": "Vulnerability = trust + relatability",
+      "priority": "HIGH",
+      "category": "story",
+      "status": "new"
+    },
+    {
+      "title": "The 10 AI Agent Tools Every Founder Should Know",
+      "pillar": "AI Agent Implementation",
+      "format": "Resource List",
+      "hook": "I tested 50 tools. These 10 are actually useful",
+      "cta": "Save this post - it's a cheatsheet",
+      "why_works": "Resource lists are highly shareable",
+      "priority": "MEDIUM",
+      "category": "resource",
+      "status": "new"
+    }
+  ]
+}

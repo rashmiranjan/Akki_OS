@@ -1,0 +1,167 @@
+{
+  "last_updated": "2026-03-04T00:09:00Z",
+  "ideas": [
+    {
+      "id": "idea_001",
+      "title": "Your SaaS Is Dead. AI Agents Are Eating Your Lunch.",
+      "angle": "Hot Take - SaaS disruption warning",
+      "platform": "LinkedIn",
+      "pain_point": "Fear of AI replacing existing software",
+      "hook": "Your SaaS product is a dinosaur. And the asteroid just hit.",
+      "key_points": [
+        "Static SaaS workflows = yesterday's news",
+        "AI agents can adapt, learn, and improve without code changes",
+        "Founders building 'features' not 'agents' are losing",
+        "The war isn't features anymore, it's autonomy",
+        "Your customers don't want tools, they want results"
+      ],
+      "call_to_action": "Stop building features. Start building agents. Or get out of the way."
+    },
+    {
+      "id": "idea_002",
+      "title": "I Fired My Entire Support Team. Here's What Happened.",
+      "angle": "Case Study - AI agent implementation",
+      "platform": "LinkedIn",
+      "pain_point": "Scaling customer support costs",
+      "hook": "Last month, I replaced 15 support agents with 3 AI agents. Our CSAT went up 40%.",
+      "key_points": [
+        "Support costs: $180K/month → $12K/month",
+        "Response time: 2 hours → 30 seconds",
+        "Human agents now handle tier-3 only",
+        "The 'human touch' argument is a coping mechanism",
+        "Your support team is a liability, not an asset"
+      ],
+      "call_to_action": "Stop optimizing human inefficiency. Start building autonomous systems."
+    },
+    {
+      "id": "idea_003",
+      "title": "The 'Agentic' Buzzword is Making You Stupid.",
+      "angle": "Myth Buster - Industry jargon",
+      "platform": "LinkedIn",
+      "pain_point": "Confusion around AI agent definitions",
+      "hook": "Calling your chatbot 'agentic' doesn't make it one. Here's the difference.",
+      "key_points": [
+        "Chatbot: You ask → It answers",
+        "Agent: You define goal → It figures out the path",
+        "Most 'AI agents' are just fancy if-else logic",
+        "True agents can plan, reason, and self-correct",
+        "The market is flooded with lipstick on pigs"
+      ],
+      "call_to_action": "Stop rebranding. Start building real autonomy."
+    },
+    {
+      "id": "idea_004",
+      "title": "3 Frameworks That Built My AI Agent Architecture",
+      "angle": "Tactical - Technical implementation",
+      "platform": "LinkedIn",
+      "pain_point": "How to actually build AI agents",
+      "hook": "Stop overengineering. These 3 frameworks handle 90% of agent use cases.",
+      "key_points": [
+        "ReAct Pattern: Reason → Act → Observe loop",
+        "Chain-of-Thought: Break complex tasks into steps",
+        "Self-Reflection: Agents that critique their own output",
+        "The stack: GPT-4 + LangChain + Vector DB",
+        "Everything else is noise"
+      ],
+      "call_to_action": "Pick one. Ship it. Iterate. That's how you build agents."
+    },
+    {
+      "id": "idea_005",
+      "title": "Why Your AI Agent Startup Will Fail",
+      "angle": "Pain Story - Common mistakes",
+      "platform": "LinkedIn",
+      "pain_point": "Building AI agents that nobody uses",
+      "hook": "I've reviewed 47 AI agent startups. 41 will die by 2025. Here's why.",
+      "key_points": [
+        "Mistake #1: Building agents that need human supervision (that's just automation)",
+        "Mistake #2: Targeting broad use cases (agents need narrow, deep expertise)",
+        "Mistake #3: No fallback strategy (agents will fail, handle it)",
+        "Mistake #4: Ignoring trust (founders don't let agents touch critical systems)",
+        "The winners: narrow, autonomous, boring B2B use cases"
+      ],
+      "call_to_action": "Niche down or die trying."
+    },
+    {
+      "id": "idea_006",
+      "title": "AI Agents Will Replace 80% of Middle Management",
+      "angle": "Hot Take - Organizational disruption",
+      "platform": "LinkedIn",
+      "pain_point": "Career uncertainty in tech",
+      "hook": "Middle managers, your days are numbered. AI agents already outperform you at your job.",
+      "key_points": [
+        "What managers do: coordinate, track, report, escalate",
+        "What agents do: coordinate, track, report, escalate, 24/7",
+        "The difference: Agents don't need meetings, don't get tired, don't have egos",
+        "This isn't speculation, it's happening now",
+        "The only safe role: Vision + Decisions that agents can't make"
+      ],
+      "call_to_action": "Be the one building the agents, not the one replaced by them."
+    },
+    {
+      "id": "idea_007",
+      "title": "The $50K Mistake I Made Building My First AI Agent",
+      "angle": "Pain Story - Learning from failure",
+      "platform": "LinkedIn",
+      "pain_point": "Wasting resources on AI projects",
+      "hook": "I spent $50K building an AI agent that generated zero ROI. Here's where I went wrong.",
+      "key_points": [
+        "Mistake #1: Built before validating the problem (classic founder error)",
+        "Mistake #2: Trained a custom model when GPT-4 worked fine (vanity project)",
+        "Mistake #3: No clear success metrics (build in dark, ship to crickets)",
+        "Mistake #4: Built for myself, not for users (n=1 trap)",
+        "The fix: Start with prompt engineering, only scale when users pay"
+      ],
+      "call_to_action": "Don't be like me. Validate first, build second."
+    },
+    {
+      "id": "idea_008",
+      "title": "RAG is Dead. Long Live the Agent.",
+      "angle": "Contrarian Take - RAG vs Agents",
+      "platform": "LinkedIn",
+      "pain_point": "Choosing the right AI architecture",
+      "hook": "Everyone's building RAG systems. They're building yesterday's tech.",
+      "key_points": [
+        "RAG = fancy search + LLM wrapper (still passive)",
+        "Agents = autonomous workflows that can take action",
+        "RAG answers questions. Agents get work done",
+        "Your competitors building RAG are building features, not products",
+        "The future isn't better retrieval, it's autonomous execution"
+      ],
+      "call_to_action": "Stop optimizing retrieval. Start optimizing agency."
+    },
+    {
+      "id": "idea_009",
+      "title": "The 3-Person Startup That Uses 47 AI Agents",
+      "angle": "Case Study - Extreme AI adoption",
+      "platform": "LinkedIn",
+      "pain_point": "Scaling with limited resources",
+      "hook": "We're 3 people doing the work of a 20-person team. Here's how we did it.",
+      "key_points": [
+        "Sales agents: Lead gen + outreach = 24/7 sales team",
+        "Support agents: Tier 1 & 2 covered automatically",
+        "Research agents: Market analysis while we sleep",
+        "Content agents: This post was drafted by one (I edited it)",
+        "Total cost: $3K/month vs $180K/month for a full team",
+        "The secret: Each agent has ONE job, does it perfectly"
+      ],
+      "call_to_action": "Stop hiring. Start automating. Your competitors are."
+    },
+    {
+      "id": "idea_010",
+      "title": "You're Using AI Agents Wrong. Here's the Fix.",
+      "angle": "Tactical - Best practices",
+      "platform": "LinkedIn",
+      "pain_point": "Poor AI agent adoption and results",
+      "hook": "Most founders treat AI agents like chatbots on steroids. That's why they fail.",
+      "key_points": [
+        "Wrong: 'Ask my agent to do X' (human-triggered, limited scale)",
+        "Right: 'My agent watches for X and acts autonomously' (trigger-free, infinite scale)",
+        "Rule #1: Agents should run in background, not foreground",
+        "Rule #2: Agents need permissions, not prompts",
+        "Rule #3: Measure agent autonomy, not agent intelligence",
+        "The best agents are the ones you forget exist"
+      ],
+      "call_to_action": "Stop prompting. Start programming autonomous behavior."
+    }
+  ]
+}

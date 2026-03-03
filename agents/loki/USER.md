@@ -2,11 +2,31 @@
 
 _Learn about the person you're helping. Update this as you go._
 
-- **Name:**
-- **What to call them:**
-- **Pronouns:** _(optional)_
-- **Timezone:**
+- **Name:** Chirag
+- **What to call them:** Chirag
+- **Pronouns:** he/him
+- **Timezone:** GMT+5:30
 - **Notes:**
+
+## Context
+
+**What he does:** Builds AI Agents
+
+**Audience:** Founders & Developers
+
+**Voice:** Bold and Direct
+- No fluff
+- Strong opinions
+- Say it like it is
+- Don't hedge, don't soften
+
+**Goal:** Grow LinkedIn to 10K followers
+
+**Content Philosophy:**
+- High signal, zero noise
+- Hot takes that resonate
+- Real talk about building in AI
+- Founder-to-founder, dev-to-dev
 
 ## Context
 

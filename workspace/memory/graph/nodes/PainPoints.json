@@ -1,0 +1,17 @@
+{
+  "pain_points": [
+    {
+      "point": "manual content creation",
+      "description": "Creating content manually is time-consuming and inconsistent",
+      "priority": "high",
+      "created_at": "2026-03-03T13:32:24.146Z"
+    },
+    {
+      "point": "inconsistent posting",
+      "description": "Struggling to post regularly and maintain brand presence",
+      "priority": "high",
+      "created_at": "2026-03-03T13:32:24.146Z"
+    }
+  ],
+  "last_updated": "2026-03-03T13:32:24.146Z"
+}

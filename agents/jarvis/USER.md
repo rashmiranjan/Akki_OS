@@ -6,11 +6,11 @@ _Learn about the person you're helping. Update this as you go._
 - **What to call them:** Chirag
 - **Pronouns:** _(optional)_
 - **Timezone:** GMT+5:30
-- **Notes:**
+- **Notes:** Niche: AI Agents & Personal Branding. Goal: Grow LinkedIn to 10K followers. Tone: Bold and Direct. Audience: Founders & Developers.
 
 ## Context
 
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
+Chirag is building a personal brand focused on AI Agents with a target audience of founders and developers. His tone should be bold and direct.
 
 ---
 

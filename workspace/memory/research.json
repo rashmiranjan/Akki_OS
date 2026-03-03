@@ -1,0 +1,42 @@
+{
+  "pain_points": [
+    "Token pricing destroying workflows overnight - sudden pricing changes break existing agent systems",
+    "Learning curve for agentic AI is steep - must master prompts, coding conventions, and create SKILL.md files to compensate for model deficiencies",
+    "Fear of obsolescence - elaborate AI engineering may be worthless in 1-2 years as models improve",
+    "AI hallucinations in critical applications - requires complex code systems to prevent errors",
+    "Market saturation fatigue - seeing the 200th variation of the same AI SaaS wrapper",
+    "Existential uncertainty about what constitutes a real AI startup vs just a model wrapper",
+    "Fear of irrelevance - as big AI companies ship their own agents, wrapper startups feel vulnerable",
+    "Multi-platform social media overhead - solo founders spending 2+ hours daily managing content across 13+ platforms",
+    "Building for imaginary users - pattern of building products without validating real pain points",
+    "SaaS product failure cycle - 6 products in 6 months all flopping from solving problems founders don't have"
+  ],
+  "trending_topics": [
+    "Agentic Workflows - autonomous AI systems that can plan, reason, and execute multi-step tasks",
+    "AI-native companies - businesses built from the ground up with AI at the core",
+    "AI Agent marketplaces - platforms to create, publish, and discover pre-built agents",
+    "No-code/Visual agent builders - drag-and-drop interfaces for building agents without code",
+    "Mobile-first AI experiences - chat with agents from phones like native apps",
+    "Multi-agent orchestration - chaining agents together for complex workflows",
+    "AI agent tool integration - agents browsing web, running code, calling APIs autonomously",
+    "Private AI bot instances - personal, isolated agent deployments vs shared infrastructure",
+    "AI streaming responses - real-time visibility into agent thinking and tool use",
+    "PWA/Offline AI capabilities - agents that work without constant connectivity"
+  ],
+  "questions": [
+    "What even is an AI startup nowadays and how are they building these products?",
+    "Are AI startups just wrappers around ChatGPT/Claude/Gemini with no real differentiation?",
+    "What part of the tech stack actually makes a product 'agentic' and not just a prompt wrapper?",
+    "Do we really need all these AI startups or is it just funding momentum and FOMO?",
+    "Has recent AI startup investment entered abnormal territory or is this just the new normal?",
+    "How do you build products people actually use instead of imaginary users?",
+    "What makes AI products succeed when traditional SaaS approaches keep failing?",
+    "How do solo founders manage multi-platform presence without losing 2+ hours daily?",
+    "Is learning to steer agentic AI a useless skill that will be obsolete in 1-2 years?",
+    "How do you differentiate your AI agent product when big tech keeps shipping free alternatives?"
+  ],
+  "researched_at": "2026-03-04T00:10:00Z",
+  "source": "Reddit research across r/artificial, r/MachineLearning, r/startups, r/SaaS",
+  "audience": "Tech Founders & Startup Teams",
+  "niche": "AI Agents"
+}
