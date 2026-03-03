@@ -12,7 +12,7 @@
 - Twitter/X: https://x.com (session saved in OpenClaw browser)
 
 ## Browser Profile
-Path: C:\Users\Lenovo\.openclaw\browser\openclaw\user-data
+Path: %USERPROFILE%\.openclaw\browser\openclaw\user-data
 Profile: Default
 
 ## My Skills
@@ -25,3 +25,4 @@ Profile: Default
 - "engagement_cycle" → Run one full engagement session on both platforms
 - "linkedin_only" → LinkedIn engagement only
 - "twitter_only" → Twitter engagement only
+

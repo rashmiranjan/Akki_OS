@@ -1,7 +1,7 @@
 ﻿# TOOLS.md - Atlas Setup
 
 ## Browser
-- Profile: C:\Users\Lenovo\.openclaw\browser\openclaw\user-data
+- Profile: %USERPROFILE%\.openclaw\browser\openclaw\user-data
 - LinkedIn session: SAVED (Default profile)
 - Twitter session: SAVED (Default profile)
 
@@ -30,3 +30,4 @@
 - 3 day gap between same profile
 - NEVER post unapproved content
 - NEVER modify Loki's drafts
+

@@ -4,7 +4,7 @@
 Publishes approved drafts on LinkedIn using saved browser session.
 
 ## Browser Profile
-C:\Users\Lenovo\.openclaw\browser\openclaw\user-data
+%USERPROFILE%\.openclaw\browser\openclaw\user-data
 
 ## Steps
 
@@ -35,3 +35,4 @@ curl -X POST http://127.0.0.1:3003 -H "Content-Type: application/json" -d "{\"ag
 - NEVER modify Loki's content
 - NEVER post if session expired — alert user instead
 - Wait 3 seconds between every browser action
+
