@@ -124,24 +124,22 @@ else
     echo "OK: Docker ready"
 fi
 
-# [3/5] OpenClaw install (official method per https://docs.openclaw.ai/install)
+# [3/5] OpenClaw install (global via sudo in standard system PATH)
 echo ""
 echo "[3/5] Installing OpenClaw..."
-# Ensure npm global bin is in PATH (per OpenClaw docs: openclaw not found after install)
-NPM_BIN="$(npm config get prefix 2>/dev/null)/bin"
-[ -d "$NPM_BIN" ] && export PATH="$NPM_BIN:$PATH"
 if ! command -v openclaw &> /dev/null; then
-    echo "Using official OpenClaw installer (install.sh | bash --no-onboard)..."
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard --no-prompt 2>/dev/null || true
-    [ -d "$NPM_BIN" ] && export PATH="$NPM_BIN:$PATH"
-    if ! command -v openclaw &> /dev/null; then
-        echo "Official installer may have prompted; trying npm install -g openclaw..."
-        npm install -g openclaw@latest 2>/dev/null || sudo npm install -g openclaw@latest
-        [ -d "$NPM_BIN" ] && export PATH="$NPM_BIN:$PATH"
+    echo "Installing OpenClaw globally with sudo npm (this will typically use /usr/local)..."
+    if ! command -v npm &> /dev/null; then
+        echo "ERROR: npm not found even though Node.js is installed. Install npm and re-run."
+        exit 1
     fi
+    sudo npm install -g openclaw@latest
 fi
 if ! command -v openclaw &> /dev/null; then
-    echo "ERROR: OpenClaw install failed. Try: curl -fsSL https://openclaw.ai/install.sh | bash"
+    GLOBAL_BIN="$(npm prefix -g 2>/dev/null)/bin"
+    echo "ERROR: openclaw not found on PATH after global install."
+    echo "Make sure your global npm bin dir is on PATH, then re-run. For example:"
+    echo "  export PATH=\"$GLOBAL_BIN:\$PATH\""
     exit 1
 fi
 echo "OK: OpenClaw installed"
