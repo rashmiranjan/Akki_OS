@@ -284,6 +284,11 @@ if [ -n "$CONVEX_URL" ] && [ -n "$CONVEX_DEPLOY_KEY" ]; then
     echo ""
     echo "Deploying Convex schema to cloud..."
     cd "$SCRIPT_DIR/mission_control/backend"
+    # Ensure backend dependencies (including convex) are installed before deploy
+    if [ ! -d "node_modules" ]; then
+        echo "Installing Mission Control backend dependencies (npm install)..."
+        npm install
+    fi
     CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY npx convex deploy
     if [ $? -ne 0 ]; then
         echo "WARN: Convex deploy failed. Run manually later:"
