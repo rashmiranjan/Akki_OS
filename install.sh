@@ -165,15 +165,42 @@ else
     source "$SCRIPT_DIR/.env"
 fi
 
-# OpenClaw onboard
+# OpenClaw onboard (CLI wizard only; we'll install a systemd service ourselves)
 echo ""
-echo "OpenClaw will now guide you through full setup..."
+echo "OpenClaw will now guide you through full setup."
 echo ""
 openclaw onboard \
     --workspace "$SCRIPT_DIR/workspace" \
     --gateway-bind loopback \
-    --install-daemon \
     --gateway-token "$OPENCLAW_TOKEN"
+
+# Install OpenClaw gateway as a systemd service (system scope) for 24/7 uptime
+if command -v systemctl &> /dev/null; then
+    echo ""
+    echo "Setting up OpenClaw Gateway as a systemd service (requires sudo)..."
+    SERVICE_NAME="openclaw"
+    SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
+    sudo bash -c "cat > \"$SERVICE_FILE\" << EOF
+[Unit]
+Description=OpenClaw Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+ExecStart=$(command -v openclaw) gateway --port 18789
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF"
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now "$SERVICE_NAME"
+    echo "OK: OpenClaw Gateway service installed and started (systemd unit: $SERVICE_NAME)."
+else
+    echo "WARN: systemd not available; OpenClaw Gateway will not auto-restart. Start manually with: openclaw gateway --port 18789"
+fi
 
 # [4/5] Agents + Skills + Webhook + Mission Control
 echo ""
