@@ -1,5 +1,8 @@
 ﻿@echo off
 setlocal enabledelayedexpansion
+set "OPERATIONS_DIR=%~dp0mission_control"
+set "OPENCLAW_WORKSPACE_ROOT=%~dp0workspace"
+set "AGENTS_ROOT=%~dp0agents"
 echo.
 echo ===================================================
 echo    Akki OS - Personal Branding Operating System
@@ -88,8 +91,8 @@ if %errorlevel% neq 0 (
 )
 
 REM Mission Control clone
-if not exist "%~dp0mission_control" (
-    git clone https://github.com/Chiraggoyal120/mission_control.git "%~dp0mission_control"
+if not exist "%OPERATIONS_DIR%" (
+    git clone https://github.com/Chiraggoyal120/mission_control.git "%OPERATIONS_DIR%"
     echo OK: Mission Control cloned
 )
 
@@ -114,7 +117,7 @@ echo CONVEX_URL=!CONVEX_URL!>> "%~dp0.env"
 echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%~dp0.env"
 
 REM Mission Control .env — sab values ek saath
-if not exist "%~dp0mission_control\.env" (
+if not exist "%OPERATIONS_DIR%\.env" (
     (
         echo FRONTEND_PORT=3000
         echo BACKEND_PORT=8000
@@ -124,15 +127,19 @@ if not exist "%~dp0mission_control\.env" (
         echo LOCAL_AUTH_TOKEN=!OPENCLAW_TOKEN!
         echo OPENCLAW_TOKEN=!OPENCLAW_TOKEN!
         echo OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789
+        echo OPENCLAW_WORKSPACE_ROOT=!OPENCLAW_WORKSPACE_ROOT!
+        echo AGENTS_ROOT=!AGENTS_ROOT!
         echo NEXT_PUBLIC_API_URL=http://localhost:8000
         echo BETTER_AUTH_URL=http://localhost:8000
         echo CONVEX_URL=!CONVEX_URL!
         echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!
-    ) > "%~dp0mission_control\.env"
+    ) > "%OPERATIONS_DIR%\.env"
     echo OK: Mission Control .env created
 ) else (
-    echo CONVEX_URL=!CONVEX_URL!>> "%~dp0mission_control\.env"
-    echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%~dp0mission_control\.env"
+    findstr /b "OPENCLAW_WORKSPACE_ROOT=" "%OPERATIONS_DIR%\.env" >nul 2>&1 || echo OPENCLAW_WORKSPACE_ROOT=!OPENCLAW_WORKSPACE_ROOT!>> "%OPERATIONS_DIR%\.env"
+    findstr /b "AGENTS_ROOT=" "%OPERATIONS_DIR%\.env" >nul 2>&1 || echo AGENTS_ROOT=!AGENTS_ROOT!>> "%OPERATIONS_DIR%\.env"
+    echo CONVEX_URL=!CONVEX_URL!>> "%OPERATIONS_DIR%\.env"
+    echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%OPERATIONS_DIR%\.env"
 )
 
 REM Deploy Convex schema — Docker se PEHLE
@@ -140,7 +147,7 @@ if not "!CONVEX_URL!"=="" (
     if not "!CONVEX_DEPLOY_KEY!"=="" (
         echo.
         echo Deploying Convex schema to cloud...
-        cd "%~dp0mission_control\backend"
+        cd "%OPERATIONS_DIR%\backend"
         set CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!
         call npx convex deploy
         if %errorlevel% neq 0 (
@@ -156,7 +163,7 @@ if not "!CONVEX_URL!"=="" (
 )
 
 REM Start Docker — Convex ready hone ke baad
-cd "%~dp0mission_control"
+cd "%OPERATIONS_DIR%"
 docker compose -f compose.yml --env-file .env up -d --build
 cd "%~dp0"
 echo OK: Mission Control started!

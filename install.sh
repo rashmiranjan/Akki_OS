@@ -146,6 +146,9 @@ echo "OK: OpenClaw installed"
 
 # Setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OPERATIONS_DIR="$SCRIPT_DIR/mission_control"
+OPENCLAW_WORKSPACE_ROOT="$SCRIPT_DIR/workspace"
+AGENTS_ROOT="$SCRIPT_DIR/agents"
 
 echo ""
 echo "==================================================="
@@ -233,8 +236,8 @@ else
 fi
 
 # Mission Control clone
-if [ ! -d "$SCRIPT_DIR/mission_control" ]; then
-    git clone https://github.com/Chiraggoyal120/mission_control.git "$SCRIPT_DIR/mission_control"
+if [ ! -d "$OPERATIONS_DIR" ]; then
+    git clone https://github.com/Chiraggoyal120/mission_control.git "$OPERATIONS_DIR"
     echo "OK: Mission Control cloned"
 fi
 
@@ -258,8 +261,8 @@ if [ -z "$CONVEX_DEPLOY_KEY" ]; then
 fi
 
 # Mission Control .env — sab values ek saath
-if [ ! -f "$SCRIPT_DIR/mission_control/.env" ]; then
-    cat > "$SCRIPT_DIR/mission_control/.env" << EOF
+if [ ! -f "$OPERATIONS_DIR/.env" ]; then
+    cat > "$OPERATIONS_DIR/.env" << EOF
 FRONTEND_PORT=3000
 BACKEND_PORT=8000
 CORS_ORIGINS=http://localhost:3000
@@ -268,6 +271,8 @@ AUTH_MODE=local
 LOCAL_AUTH_TOKEN=$OPENCLAW_TOKEN
 OPENCLAW_TOKEN=$OPENCLAW_TOKEN
 OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789
+OPENCLAW_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT
+AGENTS_ROOT=$AGENTS_ROOT
 NEXT_PUBLIC_API_URL=http://localhost:8000
 BETTER_AUTH_URL=http://localhost:8000
 CONVEX_URL=$CONVEX_URL
@@ -275,15 +280,21 @@ CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY
 EOF
     echo "OK: Mission Control .env created"
 else
-    echo "CONVEX_URL=$CONVEX_URL" >> "$SCRIPT_DIR/mission_control/.env"
-    echo "CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY" >> "$SCRIPT_DIR/mission_control/.env"
+    if ! grep -q '^OPENCLAW_WORKSPACE_ROOT=' "$OPERATIONS_DIR/.env"; then
+        echo "OPENCLAW_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT" >> "$OPERATIONS_DIR/.env"
+    fi
+    if ! grep -q '^AGENTS_ROOT=' "$OPERATIONS_DIR/.env"; then
+        echo "AGENTS_ROOT=$AGENTS_ROOT" >> "$OPERATIONS_DIR/.env"
+    fi
+    echo "CONVEX_URL=$CONVEX_URL" >> "$OPERATIONS_DIR/.env"
+    echo "CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY" >> "$OPERATIONS_DIR/.env"
 fi
 
 # Deploy Convex schema — Docker se PEHLE
 if [ -n "$CONVEX_URL" ] && [ -n "$CONVEX_DEPLOY_KEY" ]; then
     echo ""
     echo "Deploying Convex schema to cloud..."
-    cd "$SCRIPT_DIR/mission_control/backend"
+    cd "$OPERATIONS_DIR/backend"
     # Ensure backend dependencies (including convex) are installed before deploy
     if [ ! -d "node_modules" ]; then
         echo "Installing Mission Control backend dependencies (npm install)..."
@@ -302,7 +313,7 @@ else
 fi
 
 # Start Docker — Convex ready hone ke baad
-cd "$SCRIPT_DIR/mission_control"
+cd "$OPERATIONS_DIR"
 $DOCKER_CMD compose -f compose.yml --env-file .env up -d --build
 cd "$SCRIPT_DIR"
 echo "OK: Mission Control started!"
