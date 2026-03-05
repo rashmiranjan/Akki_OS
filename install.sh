@@ -150,6 +150,14 @@ OPERATIONS_DIR="$SCRIPT_DIR/mission_control"
 OPENCLAW_WORKSPACE_ROOT="$SCRIPT_DIR/workspace"
 AGENTS_ROOT="$SCRIPT_DIR/agents"
 OPENCLAW_CONFIG_PATH="${HOME}/.openclaw/openclaw.json"
+OPENCLAW_WORKSPACE_CONFIG_TEMPLATE="${OPENCLAW_WORKSPACE_ROOT}/openclaw.json"
+if [ -n "${OPENCLAW_GATEWAY_BIND:-}" ]; then
+    DESIRED_GATEWAY_BIND="$OPENCLAW_GATEWAY_BIND"
+elif [ "$OS" = "linux" ]; then
+    DESIRED_GATEWAY_BIND="lan"
+else
+    DESIRED_GATEWAY_BIND="loopback"
+fi
 
 upsert_env() {
     local key="$1"
@@ -210,6 +218,92 @@ configure_npm_user_prefix() {
     fi
 }
 
+apply_workspace_openclaw_template() {
+    if [ ! -f "$OPENCLAW_WORKSPACE_CONFIG_TEMPLATE" ]; then
+        return 0
+    fi
+    if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+        return 0
+    fi
+
+    node - "$OPENCLAW_CONFIG_PATH" "$OPENCLAW_WORKSPACE_CONFIG_TEMPLATE" <<'NODE'
+const fs = require("fs");
+const runtimePath = process.argv[2];
+const templatePath = process.argv[3];
+
+const deepMerge = (target, source) => {
+  if (!source || typeof source !== "object" || Array.isArray(source)) return target;
+  for (const [k, v] of Object.entries(source)) {
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      if (!target[k] || typeof target[k] !== "object" || Array.isArray(target[k])) {
+        target[k] = {};
+      }
+      deepMerge(target[k], v);
+    } else {
+      target[k] = v;
+    }
+  }
+  return target;
+};
+
+try {
+  const runtime = JSON.parse(fs.readFileSync(runtimePath, "utf8"));
+  const template = JSON.parse(fs.readFileSync(templatePath, "utf8"));
+  const merged = deepMerge(runtime, template);
+  fs.writeFileSync(runtimePath, JSON.stringify(merged, null, 2));
+  process.stdout.write("OK: Applied workspace/openclaw.json template\n");
+} catch (err) {
+  process.stderr.write(`WARN: Could not apply workspace OpenClaw template: ${err.message}\n`);
+}
+NODE
+}
+
+configure_openclaw_gateway_defaults() {
+    if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+        return 0
+    fi
+
+    LOCAL_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
+    AUTO_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+    if [ -n "$AUTO_IP" ]; then
+        LOCAL_ORIGINS="${LOCAL_ORIGINS},http://${AUTO_IP}:3000"
+    fi
+    EFFECTIVE_ORIGINS="${OPENCLAW_CONTROL_UI_ALLOWED_ORIGINS:-$LOCAL_ORIGINS}"
+
+    node - "$OPENCLAW_CONFIG_PATH" "$DESIRED_GATEWAY_BIND" "$EFFECTIVE_ORIGINS" <<'NODE'
+const fs = require("fs");
+const configPath = process.argv[2];
+const bindMode = process.argv[3];
+const originsCsv = process.argv[4] || "";
+
+try {
+  const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  cfg.gateway = cfg.gateway || {};
+  cfg.gateway.bind = bindMode || cfg.gateway.bind || "loopback";
+  cfg.gateway.controlUi = cfg.gateway.controlUi || {};
+
+  const origins = originsCsv
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+  const deduped = [...new Set(origins)];
+
+  if (deduped.length) {
+    cfg.gateway.controlUi.allowedOrigins = deduped;
+  }
+
+  if (cfg.gateway.bind !== "loopback") {
+    cfg.gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback = true;
+  }
+
+  fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
+  process.stdout.write(`OK: OpenClaw gateway config updated (bind=${cfg.gateway.bind})\n`);
+} catch (err) {
+  process.stderr.write(`WARN: Failed to patch OpenClaw gateway config: ${err.message}\n`);
+}
+NODE
+}
+
 echo ""
 echo "==================================================="
 echo "   SETUP - One thing needed!"
@@ -230,11 +324,13 @@ echo "OpenClaw will now guide you through full setup."
 echo ""
 openclaw onboard \
     --workspace "$SCRIPT_DIR/workspace" \
-    --gateway-bind loopback
+    --gateway-bind "$DESIRED_GATEWAY_BIND"
 
 echo ""
 echo "Syncing OpenClaw gateway token..."
 sync_openclaw_token
+apply_workspace_openclaw_template
+configure_openclaw_gateway_defaults
 
 # Install OpenClaw gateway as a systemd service (system scope) for 24/7 uptime
 if command -v systemctl &> /dev/null; then
