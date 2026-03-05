@@ -116,14 +116,24 @@ else
     echo "OK: Docker ready"
 fi
 
-# [3/5] OpenClaw install
+# [3/5] OpenClaw install (official method per https://docs.openclaw.ai/install)
 echo ""
 echo "[3/5] Installing OpenClaw..."
+# Ensure npm global bin is in PATH (per OpenClaw docs: openclaw not found after install)
+NPM_BIN="$(npm config get prefix 2>/dev/null)/bin"
+[ -d "$NPM_BIN" ] && export PATH="$NPM_BIN:$PATH"
 if ! command -v openclaw &> /dev/null; then
-    npm install -g openclaw 2>/dev/null || sudo npm install -g openclaw
+    echo "Using official OpenClaw installer (install.sh | bash --no-onboard)..."
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard --no-prompt 2>/dev/null || true
+    [ -d "$NPM_BIN" ] && export PATH="$NPM_BIN:$PATH"
+    if ! command -v openclaw &> /dev/null; then
+        echo "Official installer may have prompted; trying npm install -g openclaw..."
+        npm install -g openclaw@latest 2>/dev/null || sudo npm install -g openclaw@latest
+        [ -d "$NPM_BIN" ] && export PATH="$NPM_BIN:$PATH"
+    fi
 fi
 if ! command -v openclaw &> /dev/null; then
-    echo "ERROR: OpenClaw install failed. Try: sudo npm install -g openclaw"
+    echo "ERROR: OpenClaw install failed. Try: curl -fsSL https://openclaw.ai/install.sh | bash"
     exit 1
 fi
 echo "OK: OpenClaw installed"
@@ -153,7 +163,7 @@ fi
 echo ""
 echo "OpenClaw will now guide you through full setup..."
 echo ""
-npx openclaw onboard \
+openclaw onboard \
     --workspace "$SCRIPT_DIR/workspace" \
     --gateway-bind loopback \
     --install-daemon \
@@ -165,7 +175,7 @@ echo "[4/5] Setting up Agents + Skills + Webhook + Mission Control..."
 
 # Register agents
 for agent in jarvis fury loki shuri atlas echo oracle pulse vision; do
-    npx openclaw agents add $agent --workspace "$SCRIPT_DIR/agents/$agent" &> /dev/null || true
+    openclaw agents add $agent --workspace "$SCRIPT_DIR/agents/$agent" &> /dev/null || true
     echo "  OK: $agent registered"
 done
 
