@@ -57,18 +57,20 @@ Run `skills/convex-schema/schema.sql` in Convex SQL Editor
 
 ## 🏗️ Architecture
 ```
-Telegram → OpenClaw Gateway → Agents → Skills → Convex → Dashboard
+Bootstrap Layer (Akki OS) -> OpenClaw Gateway + Agents + Webhook
+Operations Layer (Mission Control) -> API + Convex + Dashboard
 ```
 
 ## 📁 Structure
 ```
 akki-os/
-├── agents/     # 9 AI agents (SOUL.md files)
-├── skills/     # 14 reusable skills
-├── workspace/  # Shared brain (SOUL, MEMORY, IDENTITY)
-├── install.sh  # One command setup
-└── .env.example
-```
-
-
+├── platform/
+│   ├── bootstrap/     # Installer + provisioning layer
+│   └── operations/    # Operations layer docs (mission_control runtime)
+├── mission_control/   # Backend + frontend control plane
+├── agents/            # OpenClaw agent workspaces
+├── skills/            # Reusable skill packs + scripts
+├── workspace/         # Shared OpenClaw workspace
+├── install.sh         # Bootstrap entrypoint
+└── .env.example       # Root env defaults
 ```

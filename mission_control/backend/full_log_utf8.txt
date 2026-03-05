@@ -1,0 +1,501 @@
+﻿--- Testing Gateway Connection ---
+≡ƒöî Initializing WebSocket connection to ws://135.125.131.247:18789...
+≡ƒôí WebSocket open, waiting for challenge...
+ΓÜû∩╕Å Received challenge, sending connect request...
+Γ£à Gateway Connection Finalized! Payload: {
+  "type": "hello-ok",
+  "protocol": 3,
+  "server": {
+    "version": "dev",
+    "connId": "d6d71f95-9bba-459e-99d1-fc2ad4aa7d17"
+  },
+  "features": {
+    "methods": [
+      "health",
+      "logs.tail",
+      "channels.status",
+      "channels.logout",
+      "status",
+      "usage.status",
+      "usage.cost",
+      "tts.status",
+      "tts.providers",
+      "tts.enable",
+      "tts.disable",
+      "tts.convert",
+      "tts.setProvider",
+      "config.get",
+      "config.set",
+      "config.apply",
+      "config.patch",
+      "config.schema",
+      "exec.approvals.get",
+      "exec.approvals.set",
+      "exec.approvals.node.get",
+      "exec.approvals.node.set",
+      "exec.approval.request",
+      "exec.approval.waitDecision",
+      "exec.approval.resolve",
+      "wizard.start",
+      "wizard.next",
+      "wizard.cancel",
+      "wizard.status",
+      "talk.config",
+      "talk.mode",
+      "models.list",
+      "agents.list",
+      "agents.create",
+      "agents.update",
+      "agents.delete",
+      "agents.files.list",
+      "agents.files.get",
+      "agents.files.set",
+      "skills.status",
+      "skills.bins",
+      "skills.install",
+      "skills.update",
+      "update.run",
+      "voicewake.get",
+      "voicewake.set",
+      "sessions.list",
+      "sessions.preview",
+      "sessions.patch",
+      "sessions.reset",
+      "sessions.delete",
+      "sessions.compact",
+      "last-heartbeat",
+      "set-heartbeats",
+      "wake",
+      "node.pair.request",
+      "node.pair.list",
+      "node.pair.approve",
+      "node.pair.reject",
+      "node.pair.verify",
+      "device.pair.list",
+      "device.pair.approve",
+      "device.pair.reject",
+      "device.pair.remove",
+      "device.token.rotate",
+      "device.token.revoke",
+      "node.rename",
+      "node.list",
+      "node.describe",
+      "node.invoke",
+      "node.invoke.result",
+      "node.event",
+      "cron.list",
+      "cron.status",
+      "cron.add",
+      "cron.update",
+      "cron.remove",
+      "cron.run",
+      "cron.runs",
+      "system-presence",
+      "system-event",
+      "send",
+      "agent",
+      "agent.identity.get",
+      "agent.wait",
+      "browser.request",
+      "chat.history",
+      "chat.abort",
+      "chat.send"
+    ],
+    "events": [
+      "connect.challenge",
+      "agent",
+      "chat",
+      "presence",
+      "tick",
+      "talk.mode",
+      "shutdown",
+      "health",
+      "heartbeat",
+      "cron",
+      "node.pair.requested",
+      "node.pair.resolved",
+      "node.invoke.request",
+      "device.pair.requested",
+      "device.pair.resolved",
+      "voicewake.changed",
+      "exec.approval.requested",
+      "exec.approval.resolved",
+      "update.available"
+    ]
+  },
+  "snapshot": {
+    "presence": [
+      {
+        "host": "vps-aad6884b",
+        "ip": "135.125.131.247",
+        "version": "unknown",
+        "platform": "linux 6.14.0-37-generic",
+        "deviceFamily": "Linux",
+        "modelIdentifier": "x64",
+        "mode": "gateway",
+        "reason": "self",
+        "text": "Gateway: vps-aad6884b (135.125.131.247) ┬╖ app unknown ┬╖ mode gateway ┬╖ reason self",
+        "ts": 1771910936261
+      },
+      {
+        "host": "gateway-client",
+        "version": "dev",
+        "platform": "linux",
+        "mode": "backend",
+        "deviceId": "1e07d4b6aae0fdfa56550964deec57af38737018e1851ef4992f68414f8baa6c",
+        "roles": [
+          "operator"
+        ],
+        "scopes": [
+          "operator.write"
+        ],
+        "instanceId": "1e07d4b6aae0fdfa56550964deec57af38737018e1851ef4992f68414f8baa6c",
+        "reason": "disconnect",
+        "ts": 1771910696961,
+        "text": "Node: gateway-client ┬╖ mode backend"
+      }
+    ],
+    "health": {
+      "ok": true,
+      "ts": 1771910923803,
+      "durationMs": 21,
+      "channels": {
+        "telegram": {
+          "configured": true,
+          "tokenSource": "none",
+          "running": false,
+          "mode": null,
+          "lastStartAt": null,
+          "lastStopAt": null,
+          "lastError": null,
+          "probe": {
+            "ok": true,
+            "status": null,
+            "error": null,
+            "elapsedMs": 21,
+            "bot": {
+              "id": 8131281571,
+              "username": "AkkiOS_bot",
+              "canJoinGroups": true,
+              "canReadAllGroupMessages": true,
+              "supportsInlineQueries": false
+            },
+            "webhook": {
+              "url": "",
+              "hasCustomCert": false
+            }
+          },
+          "lastProbeAt": 1771910923803,
+          "accountId": "default",
+          "accounts": {
+            "default": {
+              "configured": true,
+              "tokenSource": "none",
+              "running": false,
+              "mode": null,
+              "lastStartAt": null,
+              "lastStopAt": null,
+              "lastError": null,
+              "probe": {
+                "ok": true,
+                "status": null,
+                "error": null,
+                "elapsedMs": 21,
+                "bot": {
+                  "id": 8131281571,
+                  "username": "AkkiOS_bot",
+                  "canJoinGroups": true,
+                  "canReadAllGroupMessages": true,
+                  "supportsInlineQueries": false
+                },
+                "webhook": {
+                  "url": "",
+                  "hasCustomCert": false
+                }
+              },
+              "lastProbeAt": 1771910923803,
+              "accountId": "default"
+            }
+          }
+        }
+      },
+      "channelOrder": [
+        "telegram"
+      ],
+      "channelLabels": {
+        "telegram": "Telegram"
+      },
+      "heartbeatSeconds": 1800,
+      "defaultAgentId": "main",
+      "agents": [
+        {
+          "agentId": "main",
+          "isDefault": true,
+          "heartbeat": {
+            "enabled": true,
+            "every": "30m",
+            "everyMs": 1800000,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/main/sessions/sessions.json",
+            "count": 76,
+            "recent": [
+              {
+                "key": "agent:main:main",
+                "updatedAt": 1771910697075,
+                "age": 226706
+              },
+              {
+                "key": "agent:main:cron:13d17469-dfec-449f-a3f4-077fcd6a0cb7",
+                "updatedAt": 1771910696284,
+                "age": 227497
+              },
+              {
+                "key": "agent:main:cron:13d17469-dfec-449f-a3f4-077fcd6a0cb7:run:f9170a95-50d0-4574-ad27-78cfa425d822",
+                "updatedAt": 1771910696284,
+                "age": 227497
+              },
+              {
+                "key": "agent:main:cron:13d17469-dfec-449f-a3f4-077fcd6a0cb7:run:611faa88-c3d7-4baf-bdc1-55f4976c0561",
+                "updatedAt": 1771910696283,
+                "age": 227498
+              },
+              {
+                "key": "agent:main:cron:b54d1529-0457-4f0a-a441-c6e10ebd45b9",
+                "updatedAt": 1771907244085,
+                "age": 3679696
+              }
+            ]
+          }
+        },
+        {
+          "agentId": "jarvis",
+          "name": "jarvis",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/jarvis/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "fury",
+          "name": "fury",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/fury/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "loki",
+          "name": "loki",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/loki/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "shuri",
+          "name": "shuri",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/shuri/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "vision",
+          "name": "vision",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/vision/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "atlas",
+          "name": "atlas",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/atlas/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "echo",
+          "name": "echo",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/echo/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "oracle",
+          "name": "oracle",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/oracle/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        },
+        {
+          "agentId": "pulse",
+          "name": "pulse",
+          "isDefault": false,
+          "heartbeat": {
+            "enabled": false,
+            "every": "disabled",
+            "everyMs": null,
+            "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ackMaxChars": 300
+          },
+          "sessions": {
+            "path": "/home/ubuntu/.openclaw/agents/pulse/sessions/sessions.json",
+            "count": 0,
+            "recent": []
+          }
+        }
+      ],
+      "sessions": {
+        "path": "/home/ubuntu/.openclaw/agents/main/sessions/sessions.json",
+        "count": 76,
+        "recent": [
+          {
+            "key": "agent:main:main",
+            "updatedAt": 1771910697075,
+            "age": 226706
+          },
+          {
+            "key": "agent:main:cron:13d17469-dfec-449f-a3f4-077fcd6a0cb7",
+            "updatedAt": 1771910696284,
+            "age": 227497
+          },
+          {
+            "key": "agent:main:cron:13d17469-dfec-449f-a3f4-077fcd6a0cb7:run:f9170a95-50d0-4574-ad27-78cfa425d822",
+            "updatedAt": 1771910696284,
+            "age": 227497
+          },
+          {
+            "key": "agent:main:cron:13d17469-dfec-449f-a3f4-077fcd6a0cb7:run:611faa88-c3d7-4baf-bdc1-55f4976c0561",
+            "updatedAt": 1771910696283,
+            "age": 227498
+          },
+          {
+            "key": "agent:main:cron:b54d1529-0457-4f0a-a441-c6e10ebd45b9",
+            "updatedAt": 1771907244085,
+            "age": 3679696
+          }
+        ]
+      }
+    },
+    "stateVersion": {
+      "presence": 61,
+      "health": 928
+    },
+    "uptimeMs": 53177492,
+    "configPath": "/home/ubuntu/.openclaw/openclaw.json",
+    "stateDir": "/home/ubuntu/.openclaw",
+    "sessionDefaults": {
+      "defaultAgentId": "main",
+      "mainKey": "main",
+      "mainSessionKey": "agent:main:main",
+      "scope": "per-sender"
+    },
+    "authMode": "token"
+  },
+  "canvasHostUrl": "http://135.125.131.247:18789",
+  "policy": {
+    "maxPayload": 26214400,
+    "maxBufferedBytes": 52428800,
+    "tickIntervalMs": 30000
+  }
+}
+node.exe : Γ¥î Gateway Error: missing scope: operator.write
+At line:1 char:1
++ & "E:\/node.exe" "E:\/node_modules/npm/bin/npx-cli.js" ts-node src/sc ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Γ¥î Gateway Err... operator.write:String) [], Rem 
+   oteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+≡ƒôÑ RPC Response for chat.send: {"type":"res","id":"34c56de5-bdd8-445a-8b84-18d207077de8","ok":false,"error":{"code":"INVALID_REQUEST","message":"missing scope: operator.write"}}
+Γ¥î Gateway Test Failed: missing scope: operator.write
+

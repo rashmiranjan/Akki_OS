@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.2.17",
+    "lastTouchedAt": "2026-02-19T08:18:36.900Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-02-18T04:42:08.117Z",
+    "lastRunVersion": "2026.2.17",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "auth": {
+    "profiles": {
+      "google:default": {
+        "provider": "google",
+        "mode": "api_key"
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "google/gemini-3-pro-preview"
+      },
+      "models": {
+        "google/gemini-3-pro-preview": {}
+      },
+      "workspace": "/home/ubuntu/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "subagents": {
+          "allowAgents": [
+            "jarvis" , "fury",
+            "loki",
+            "oracle",
+            "atlas",
+            "echo",
+            "pulse",
+            "shuri",
+            "vision"
+          ]
+        }
+      },
+      {
+        "id": "jarvis",
+        "name": "jarvis",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/jarvis",
+        "agentDir": "/home/ubuntu/.openclaw/agents/jarvis/agent"
+      },
+      {
+        "id": "fury",
+        "name": "fury",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/fury",
+        "agentDir": "/home/ubuntu/.openclaw/agents/fury/agent"
+      },
+      {
+        "id": "loki",
+        "name": "loki",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/loki",
+        "agentDir": "/home/ubuntu/.openclaw/agents/loki/agent"
+      },
+      {
+        "id": "shuri",
+        "name": "shuri",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/shuri",
+        "agentDir": "/home/ubuntu/.openclaw/agents/shuri/agent"
+      },
+      {
+        "id": "vision",
+        "name": "vision",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/vision",
+        "agentDir": "/home/ubuntu/.openclaw/agents/vision/agent"
+      },
+      {
+        "id": "atlas",
+        "name": "atlas",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/atlas",
+        "agentDir": "/home/ubuntu/.openclaw/agents/atlas/agent"
+      },
+      {
+        "id": "echo",
+        "name": "echo",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/echo",
+        "agentDir": "/home/ubuntu/.openclaw/agents/echo/agent"
+      },
+      {
+        "id": "oracle",
+        "name": "oracle",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/oracle",
+        "agentDir": "/home/ubuntu/.openclaw/agents/oracle/agent"
+      },
+      {
+        "id": "pulse",
+        "name": "pulse",
+        "workspace": "/home/ubuntu/.openclaw/mission-control/agents/pulse",
+        "agentDir": "/home/ubuntu/.openclaw/agents/pulse/agent"
+      }
+    ]
+  },
+  "tools": {
+    "byProvider": {
+      "telegram": {
+        "profile": "minimal"
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "botToken": "8131281571:AAFSRaM5zklZCYMUIsS6Z8OLfrqg72V3vXQ",
+      "groupPolicy": "open",
+      "streamMode": "partial"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "lan",
+    "auth": {
+      "mode": "token",
+      "token": "c68e27a8d8de9b345d96d52d25991dc08250fb1a47f0d247"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "calendar.add",
+        "contacts.add",
+        "reminders.add"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": {
+        "enabled": true
+      }
+    }
+  }
+}
