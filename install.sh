@@ -16,38 +16,46 @@ detect_os() {
 }
 OS="$(detect_os)"
 
-# [1/5] Node.js check + auto-install
+# [1/5] Node.js check + auto-install (Node 22+ required by OpenClaw)
 echo "[1/5] Checking Node.js..."
-if ! command -v node &> /dev/null; then
-    echo "Node.js not found. Installing automatically..."
+NODE_MAJOR=""
+if command -v node &> /dev/null; then
+    NODE_MAJOR=$(node -v 2>/dev/null | sed 's/^v//; s/\..*//')
+fi
+if [ -z "$NODE_MAJOR" ] || [ "$NODE_MAJOR" -lt 22 ] 2>/dev/null; then
+    if [ -n "$NODE_MAJOR" ]; then
+        echo "Node.js v$(node -v 2>/dev/null) found, upgrading to v22+..."
+    else
+        echo "Node.js not found. Installing Node 22+..."
+    fi
     if [ "$OS" = "linux" ]; then
         if command -v curl &> /dev/null; then
-            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
             sudo apt-get install -y nodejs
         elif command -v apt-get &> /dev/null; then
             sudo apt-get update && sudo apt-get install -y nodejs npm
         else
-            echo "ERROR: Could not install Node.js. Install manually from https://nodejs.org"
+            echo "ERROR: Could not install Node.js. Install Node 22+ from https://nodejs.org"
             exit 1
         fi
     elif [ "$OS" = "macos" ]; then
         if command -v brew &> /dev/null; then
             brew install node
         else
-            echo "ERROR: Homebrew not found. Install Node from https://nodejs.org or run: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+            echo "ERROR: Homebrew not found. Install Node 22+ from https://nodejs.org or run: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
             exit 1
         fi
     else
-        echo "ERROR: Unsupported OS. Install Node.js 18+ from https://nodejs.org"
+        echo "ERROR: Unsupported OS. Install Node.js 22+ from https://nodejs.org"
         exit 1
     fi
     if ! command -v node &> /dev/null; then
-        echo "ERROR: Node.js install failed. Install manually from https://nodejs.org"
+        echo "ERROR: Node.js install failed. Install Node 22+ manually from https://nodejs.org"
         exit 1
     fi
-    echo "OK: Node.js installed"
+    echo "OK: Node.js $(node -v) installed"
 else
-    echo "OK: Node.js ready"
+    echo "OK: Node.js $(node -v) ready"
 fi
 
 # [2/5] Docker check + auto-install
