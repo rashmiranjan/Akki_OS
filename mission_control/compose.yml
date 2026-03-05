@@ -8,6 +8,8 @@ services:
       - .env
     ports:
       - "${BACKEND_PORT:-8000}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend/auth.db:/app/auth.db
 
@@ -23,3 +25,5 @@ services:
       - backend
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
