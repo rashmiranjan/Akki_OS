@@ -40,25 +40,38 @@ echo ===================================================
 echo.
 
 if not exist "%~dp0.env" (
-    echo --- Gateway Password ---
-    echo This will be your dashboard login password.
-    echo.
-    set /p OPENCLAW_TOKEN="Enter Gateway Password (e.g. akki2026): "
-    (echo OPENCLAW_TOKEN=!OPENCLAW_TOKEN!) > "%~dp0.env"
-    echo OK: Saved!
-) else (
-    echo OK: Found existing .env, loading...
-    for /f "usebackq tokens=1,2 delims==" %%a in ("%~dp0.env") do (
-        if "%%a"=="OPENCLAW_TOKEN"    set OPENCLAW_TOKEN=%%b
-        if "%%a"=="CONVEX_URL"        set CONVEX_URL=%%b
-        if "%%a"=="CONVEX_DEPLOY_KEY" set CONVEX_DEPLOY_KEY=%%b
-    )
+    type nul > "%~dp0.env"
+)
+echo OK: Loading existing .env values...
+for /f "usebackq tokens=1,2 delims==" %%a in ("%~dp0.env") do (
+    if "%%a"=="OPENCLAW_TOKEN"    set OPENCLAW_TOKEN=%%b
+    if "%%a"=="CONVEX_URL"        set CONVEX_URL=%%b
+    if "%%a"=="CONVEX_DEPLOY_KEY" set CONVEX_DEPLOY_KEY=%%b
 )
 
 echo.
 echo OpenClaw will now guide you through full setup...
 echo.
-call npx openclaw onboard --workspace "%~dp0workspace" --gateway-bind loopback --install-daemon --gateway-token "!OPENCLAW_TOKEN!"
+call npx openclaw onboard --workspace "%~dp0workspace" --gateway-bind loopback --install-daemon
+
+echo.
+echo Syncing gateway token...
+for /f %%t in ('node -e "try{const fs=require('fs');const p=(process.env.USERPROFILE||'')+'\\\\.openclaw\\\\openclaw.json';const c=JSON.parse(fs.readFileSync(p,'utf8'));console.log((c.gateway&&c.gateway.auth&&c.gateway.auth.token)||'')}catch(e){console.log('')}"') do set ACTUAL_TOKEN=%%t
+if not "!ACTUAL_TOKEN!"=="" (
+    set OPENCLAW_TOKEN=!ACTUAL_TOKEN!
+    echo OK: Gateway token synced
+) else (
+    if "!OPENCLAW_TOKEN!"=="" (
+        echo ERROR: Could not read OpenClaw token from %%USERPROFILE%%\.openclaw\openclaw.json
+        pause
+        exit /b 1
+    )
+    echo WARN: Could not read token from OpenClaw config, using existing token from .env
+)
+
+findstr /v /b "OPENCLAW_TOKEN=" "%~dp0.env" > "%~dp0.env.tmp"
+move /y "%~dp0.env.tmp" "%~dp0.env" >nul
+echo OPENCLAW_TOKEN=!OPENCLAW_TOKEN!>> "%~dp0.env"
 
 echo.
 echo [4/5] Setting up Agents + Skills + Webhook + Mission Control...
@@ -114,31 +127,24 @@ REM Save to root .env
 echo CONVEX_URL=!CONVEX_URL!>> "%~dp0.env"
 echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%~dp0.env"
 
-REM Mission Control .env — sab values ek saath
-if not exist "%OPERATIONS_DIR%\.env" (
-    (
-        echo FRONTEND_PORT=3000
-        echo BACKEND_PORT=8000
-        echo CORS_ORIGINS=http://localhost:3000
-        echo CORS_ORIGIN=http://localhost:3000
-        echo AUTH_MODE=local
-        echo LOCAL_AUTH_TOKEN=!OPENCLAW_TOKEN!
-        echo OPENCLAW_TOKEN=!OPENCLAW_TOKEN!
-        echo OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789
-        echo OPENCLAW_WORKSPACE_ROOT=!OPENCLAW_WORKSPACE_ROOT!
-        echo AGENTS_ROOT=!AGENTS_ROOT!
-        echo NEXT_PUBLIC_API_URL=http://localhost:8000
-        echo BETTER_AUTH_URL=http://localhost:8000
-        echo CONVEX_URL=!CONVEX_URL!
-        echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!
-    ) > "%OPERATIONS_DIR%\.env"
-    echo OK: Mission Control .env created
-) else (
-    findstr /b "OPENCLAW_WORKSPACE_ROOT=" "%OPERATIONS_DIR%\.env" >nul 2>&1 || echo OPENCLAW_WORKSPACE_ROOT=!OPENCLAW_WORKSPACE_ROOT!>> "%OPERATIONS_DIR%\.env"
-    findstr /b "AGENTS_ROOT=" "%OPERATIONS_DIR%\.env" >nul 2>&1 || echo AGENTS_ROOT=!AGENTS_ROOT!>> "%OPERATIONS_DIR%\.env"
-    echo CONVEX_URL=!CONVEX_URL!>> "%OPERATIONS_DIR%\.env"
-    echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%OPERATIONS_DIR%\.env"
-)
+REM Mission Control .env — always rebuild so token stays synced with OpenClaw
+(
+    echo FRONTEND_PORT=3000
+    echo BACKEND_PORT=8000
+    echo CORS_ORIGINS=http://localhost:3000
+    echo CORS_ORIGIN=http://localhost:3000
+    echo AUTH_MODE=local
+    echo LOCAL_AUTH_TOKEN=!OPENCLAW_TOKEN!
+    echo OPENCLAW_TOKEN=!OPENCLAW_TOKEN!
+    echo OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789
+    echo OPENCLAW_WORKSPACE_ROOT=!OPENCLAW_WORKSPACE_ROOT!
+    echo AGENTS_ROOT=!AGENTS_ROOT!
+    echo NEXT_PUBLIC_API_URL=http://localhost:8000
+    echo BETTER_AUTH_URL=http://localhost:8000
+    echo CONVEX_URL=!CONVEX_URL!
+    echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!
+) > "%OPERATIONS_DIR%\.env"
+echo OK: Mission Control .env synced
 
 REM Deploy Convex schema — Docker se PEHLE
 if not "!CONVEX_URL!"=="" (

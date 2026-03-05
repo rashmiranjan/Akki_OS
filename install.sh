@@ -149,6 +149,66 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OPERATIONS_DIR="$SCRIPT_DIR/mission_control"
 OPENCLAW_WORKSPACE_ROOT="$SCRIPT_DIR/workspace"
 AGENTS_ROOT="$SCRIPT_DIR/agents"
+OPENCLAW_CONFIG_PATH="${HOME}/.openclaw/openclaw.json"
+
+upsert_env() {
+    local key="$1"
+    local value="$2"
+    local env_file="$SCRIPT_DIR/.env"
+    if [ ! -f "$env_file" ]; then
+        touch "$env_file"
+    fi
+    if grep -q "^${key}=" "$env_file"; then
+        sed -i.bak "s|^${key}=.*$|${key}=${value}|" "$env_file" && rm -f "$env_file.bak"
+    else
+        echo "${key}=${value}" >> "$env_file"
+    fi
+}
+
+sync_openclaw_token() {
+    if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+        echo ""
+        echo "ERROR: Could not find OpenClaw config at $OPENCLAW_CONFIG_PATH"
+        echo "Run onboarding once and re-run install.sh."
+        exit 1
+    fi
+
+    ACTUAL_OPENCLAW_TOKEN="$(node -e "
+      try {
+        const fs = require('fs');
+        const cfg = JSON.parse(fs.readFileSync(process.argv[1], 'utf8'));
+        const token = cfg?.gateway?.auth?.token || '';
+        process.stdout.write(token);
+      } catch (_) {
+        process.stdout.write('');
+      }
+    " "$OPENCLAW_CONFIG_PATH")"
+
+    if [ -z "$ACTUAL_OPENCLAW_TOKEN" ]; then
+        echo ""
+        echo "ERROR: OpenClaw token not found in $OPENCLAW_CONFIG_PATH"
+        echo "Please run: openclaw doctor"
+        exit 1
+    fi
+
+    OPENCLAW_TOKEN="$ACTUAL_OPENCLAW_TOKEN"
+    upsert_env "OPENCLAW_TOKEN" "$OPENCLAW_TOKEN"
+    echo "OK: Synced OpenClaw gateway token"
+}
+
+configure_npm_user_prefix() {
+    # Prevent EACCES when OpenClaw installs missing skill deps (e.g. clawhub).
+    if command -v npm &> /dev/null; then
+        mkdir -p "$HOME/.npm-global"
+        export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+        npm config set prefix "$NPM_CONFIG_PREFIX" >/dev/null 2>&1 || true
+        case ":$PATH:" in
+            *":$HOME/.npm-global/bin:"*) ;;
+            *) export PATH="$HOME/.npm-global/bin:$PATH" ;;
+        esac
+        echo "OK: npm user prefix set to $NPM_CONFIG_PREFIX"
+    fi
+}
 
 echo ""
 echo "==================================================="
@@ -157,16 +217,12 @@ echo "==================================================="
 echo ""
 
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
-    echo "--- Gateway Password ---"
-    echo "This will be your dashboard login password."
-    echo ""
-    read -p "Enter Gateway Password (e.g. akki2026): " OPENCLAW_TOKEN
-    echo "OPENCLAW_TOKEN=$OPENCLAW_TOKEN" > "$SCRIPT_DIR/.env"
-    echo "OK: Saved!"
-else
-    echo "OK: Found existing .env, loading..."
-    source "$SCRIPT_DIR/.env"
+    touch "$SCRIPT_DIR/.env"
+    echo "OK: Created .env"
 fi
+echo "OK: Loading .env"
+source "$SCRIPT_DIR/.env"
+configure_npm_user_prefix
 
 # OpenClaw onboard (CLI wizard only; we'll install a systemd service ourselves)
 echo ""
@@ -174,8 +230,11 @@ echo "OpenClaw will now guide you through full setup."
 echo ""
 openclaw onboard \
     --workspace "$SCRIPT_DIR/workspace" \
-    --gateway-bind loopback \
-    --gateway-token "$OPENCLAW_TOKEN"
+    --gateway-bind loopback
+
+echo ""
+echo "Syncing OpenClaw gateway token..."
+sync_openclaw_token
 
 # Install OpenClaw gateway as a systemd service (system scope) for 24/7 uptime
 if command -v systemctl &> /dev/null; then
@@ -253,16 +312,15 @@ echo ""
 
 if [ -z "$CONVEX_URL" ]; then
     read -p "Enter Convex Cloud URL (https://xxx.convex.cloud): " CONVEX_URL
-    echo "CONVEX_URL=$CONVEX_URL" >> "$SCRIPT_DIR/.env"
 fi
 if [ -z "$CONVEX_DEPLOY_KEY" ]; then
     read -p "Enter Convex Deploy Key (dev:xxx|yyy): " CONVEX_DEPLOY_KEY
-    echo "CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY" >> "$SCRIPT_DIR/.env"
 fi
+upsert_env "CONVEX_URL" "$CONVEX_URL"
+upsert_env "CONVEX_DEPLOY_KEY" "$CONVEX_DEPLOY_KEY"
 
-# Mission Control .env — sab values ek saath
-if [ ! -f "$OPERATIONS_DIR/.env" ]; then
-    cat > "$OPERATIONS_DIR/.env" << EOF
+# Mission Control .env — always refresh so token stays in sync with OpenClaw
+cat > "$OPERATIONS_DIR/.env" << EOF
 FRONTEND_PORT=3000
 BACKEND_PORT=8000
 CORS_ORIGINS=http://localhost:3000
@@ -278,17 +336,7 @@ BETTER_AUTH_URL=http://localhost:8000
 CONVEX_URL=$CONVEX_URL
 CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY
 EOF
-    echo "OK: Mission Control .env created"
-else
-    if ! grep -q '^OPENCLAW_WORKSPACE_ROOT=' "$OPERATIONS_DIR/.env"; then
-        echo "OPENCLAW_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT" >> "$OPERATIONS_DIR/.env"
-    fi
-    if ! grep -q '^AGENTS_ROOT=' "$OPERATIONS_DIR/.env"; then
-        echo "AGENTS_ROOT=$AGENTS_ROOT" >> "$OPERATIONS_DIR/.env"
-    fi
-    echo "CONVEX_URL=$CONVEX_URL" >> "$OPERATIONS_DIR/.env"
-    echo "CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY" >> "$OPERATIONS_DIR/.env"
-fi
+echo "OK: Mission Control .env synced"
 
 # Deploy Convex schema — Docker se PEHLE
 if [ -n "$CONVEX_URL" ] && [ -n "$CONVEX_DEPLOY_KEY" ]; then
