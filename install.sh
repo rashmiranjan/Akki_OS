@@ -159,6 +159,20 @@ else
     DESIRED_GATEWAY_BIND="loopback"
 fi
 
+detect_public_host() {
+    if [ -n "${OPENCLAW_PUBLIC_HOST:-}" ]; then
+        echo "$OPENCLAW_PUBLIC_HOST"
+        return
+    fi
+    local detected
+    detected="$(hostname -I 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i !~ /^127\./) {print $i; exit}}')"
+    if [ -n "$detected" ]; then
+        echo "$detected"
+    else
+        echo "localhost"
+    fi
+}
+
 upsert_env() {
     local key="$1"
     local value="$2"
@@ -301,6 +315,10 @@ try {
 } catch (err) {
   process.stderr.write(`WARN: Failed to patch OpenClaw gateway config: ${err.message}\n`);
 }
+
+PUBLIC_HOST="$(detect_public_host)"
+FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
+API_BASE_URL="http://${PUBLIC_HOST}:8000"
 NODE
 }
 
@@ -419,16 +437,16 @@ upsert_env "CONVEX_DEPLOY_KEY" "$CONVEX_DEPLOY_KEY"
 cat > "$OPERATIONS_DIR/.env" << EOF
 FRONTEND_PORT=3000
 BACKEND_PORT=8000
-CORS_ORIGINS=http://localhost:3000
-CORS_ORIGIN=http://localhost:3000
+CORS_ORIGINS=${FRONTEND_ORIGIN},http://localhost:3000,http://127.0.0.1:3000
+CORS_ORIGIN=${FRONTEND_ORIGIN}
 AUTH_MODE=local
 LOCAL_AUTH_TOKEN=$OPENCLAW_TOKEN
 OPENCLAW_TOKEN=$OPENCLAW_TOKEN
 OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789
 OPENCLAW_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT
 AGENTS_ROOT=$AGENTS_ROOT
-NEXT_PUBLIC_API_URL=http://localhost:8000
-BETTER_AUTH_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=${API_BASE_URL}
+BETTER_AUTH_URL=${API_BASE_URL}
 CONVEX_URL=$CONVEX_URL
 CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY
 EOF
