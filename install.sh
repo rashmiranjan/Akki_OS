@@ -77,18 +77,44 @@ if ! command -v docker &> /dev/null; then
     fi
     echo "OK: Docker installed"
 fi
+# Ensure Docker daemon is running (Linux); use DOCKER_CMD so we can fall back to sudo if needed
+DOCKER_CMD="docker"
 if ! docker info &> /dev/null; then
     if [ "$OS" = "linux" ]; then
         echo "Starting Docker service..."
+        sudo systemctl enable docker 2>/dev/null || true
         sudo systemctl start docker 2>/dev/null || sudo service docker start 2>/dev/null || true
-        sleep 2
-    fi
-    if ! docker info &> /dev/null; then
-        echo "ERROR: Docker not running. On Linux run: sudo systemctl start docker. On macOS start Docker Desktop."
+        for i in 1 2 3 4 5; do
+            sleep 2
+            if docker info &> /dev/null; then
+                break
+            fi
+            if [ "$i" -eq 5 ]; then
+                if sudo docker info &> /dev/null; then
+                    DOCKER_CMD="sudo docker"
+                    echo "OK: Docker is running (using sudo for this session; log out and back in to use docker without sudo)."
+                else
+                    echo "ERROR: Docker not running. Try: sudo systemctl start docker"
+                    exit 1
+                fi
+            fi
+        done
+    else
+        echo "ERROR: Docker not running. On macOS start Docker Desktop."
         exit 1
     fi
 fi
-echo "OK: Docker ready"
+if ! $DOCKER_CMD info &> /dev/null; then
+    if [ "$OS" = "linux" ] && sudo docker info &> /dev/null; then
+        DOCKER_CMD="sudo docker"
+        echo "OK: Docker ready (using sudo for this session)."
+    else
+        echo "ERROR: Docker not running. On Linux run: sudo systemctl start docker. On macOS start Docker Desktop."
+        exit 1
+    fi
+else
+    echo "OK: Docker ready"
+fi
 
 # [3/5] OpenClaw install
 echo ""
@@ -229,7 +255,7 @@ fi
 
 # Start Docker — Convex ready hone ke baad
 cd "$SCRIPT_DIR/mission_control"
-docker compose -f compose.yml --env-file .env up -d --build
+$DOCKER_CMD compose -f compose.yml --env-file .env up -d --build
 cd "$SCRIPT_DIR"
 echo "OK: Mission Control started!"
 
