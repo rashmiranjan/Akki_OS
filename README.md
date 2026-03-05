@@ -4,7 +4,7 @@
 
 ## ⚡ Quick Start
 ```bash
-git clone https://github.com/Chiraggoyal120/Akki_OS
+git clone https://github.com/rashmiranjan/Akki_OS
 cd Akki_OS
 bash install.sh
 ```
@@ -70,10 +70,5 @@ akki-os/
 └── .env.example
 ```
 
-## 🖥️ Dashboard
-```bash
-git clone https://github.com/Chiraggoyal120/mission_control
-cd mission_control
-cp .env.example .env
-npm install && npm run dev
+
 ```
