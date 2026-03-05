@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 echo ""
 echo "==================================================="
@@ -6,23 +6,87 @@ echo "   Akki OS - Personal Branding Operating System"
 echo "==================================================="
 echo ""
 
-# [1/5] Node.js check
+# Detect OS for auto-install
+detect_os() {
+    case "$(uname -s)" in
+        Linux*)   echo "linux";;
+        Darwin*) echo "macos";;
+        *)       echo "unknown";;
+    esac
+}
+OS="$(detect_os)"
+
+# [1/5] Node.js check + auto-install
 echo "[1/5] Checking Node.js..."
 if ! command -v node &> /dev/null; then
-    echo "ERROR: Node.js not found! Install from: https://nodejs.org"
-    exit 1
+    echo "Node.js not found. Installing automatically..."
+    if [ "$OS" = "linux" ]; then
+        if command -v curl &> /dev/null; then
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+        elif command -v apt-get &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y nodejs npm
+        else
+            echo "ERROR: Could not install Node.js. Install manually from https://nodejs.org"
+            exit 1
+        fi
+    elif [ "$OS" = "macos" ]; then
+        if command -v brew &> /dev/null; then
+            brew install node
+        else
+            echo "ERROR: Homebrew not found. Install Node from https://nodejs.org or run: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+            exit 1
+        fi
+    else
+        echo "ERROR: Unsupported OS. Install Node.js 18+ from https://nodejs.org"
+        exit 1
+    fi
+    if ! command -v node &> /dev/null; then
+        echo "ERROR: Node.js install failed. Install manually from https://nodejs.org"
+        exit 1
+    fi
+    echo "OK: Node.js installed"
+else
+    echo "OK: Node.js ready"
 fi
-echo "OK: Node.js ready"
 
-# [2/5] Docker check
+# [2/5] Docker check + auto-install
 echo "[2/5] Checking Docker..."
 if ! command -v docker &> /dev/null; then
-    echo "ERROR: Docker not found! Install from: https://docker.com"
-    exit 1
+    echo "Docker not found. Installing automatically..."
+    if [ "$OS" = "linux" ]; then
+        if command -v curl &> /dev/null; then
+            curl -fsSL https://get.docker.com | sudo sh
+            sudo usermod -aG docker "$USER" 2>/dev/null || true
+        else
+            echo "ERROR: curl required to install Docker. Install Docker manually from https://docker.com"
+            exit 1
+        fi
+    elif [ "$OS" = "macos" ]; then
+        if command -v brew &> /dev/null; then
+            brew install --cask docker
+            echo "Docker Desktop installed. Please open Docker from Applications and start it, then re-run this script."
+            exit 0
+        else
+            echo "ERROR: Install Docker Desktop from https://docker.com"
+            exit 1
+        fi
+    else
+        echo "ERROR: Install Docker from https://docker.com"
+        exit 1
+    fi
+    echo "OK: Docker installed"
 fi
 if ! docker info &> /dev/null; then
-    echo "ERROR: Docker not running! Please start Docker first."
-    exit 1
+    if [ "$OS" = "linux" ]; then
+        echo "Starting Docker service..."
+        sudo systemctl start docker 2>/dev/null || sudo service docker start 2>/dev/null || true
+        sleep 2
+    fi
+    if ! docker info &> /dev/null; then
+        echo "ERROR: Docker not running. On Linux run: sudo systemctl start docker. On macOS start Docker Desktop."
+        exit 1
+    fi
 fi
 echo "OK: Docker ready"
 
@@ -30,7 +94,11 @@ echo "OK: Docker ready"
 echo ""
 echo "[3/5] Installing OpenClaw..."
 if ! command -v openclaw &> /dev/null; then
-    npm install -g openclaw
+    npm install -g openclaw 2>/dev/null || sudo npm install -g openclaw
+fi
+if ! command -v openclaw &> /dev/null; then
+    echo "ERROR: OpenClaw install failed. Try: sudo npm install -g openclaw"
+    exit 1
 fi
 echo "OK: OpenClaw installed"
 
