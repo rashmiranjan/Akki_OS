@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "min_openclaw_version": "0.0.0",
   "components": {
     "agents": {
@@ -25,5 +25,5 @@
       "description": "Introduce install/upgrade split, managed sync, and state tracking"
     }
   ],
-  "generated_at": "2026-03-06T04:41:03.321Z"
+  "generated_at": "2026-03-06T08:42:22.324Z"
 }

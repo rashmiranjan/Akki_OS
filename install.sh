@@ -218,8 +218,14 @@ detect_public_host() {
         echo "$OPENCLAW_PUBLIC_HOST"
         return
     fi
-    local detected
+    local detected=""
     detected="$(hostname -I 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i !~ /^127\./) {print $i; exit}}')"
+    if [ -z "$detected" ] && command -v ip >/dev/null 2>&1; then
+        detected="$(ip route get 1.1.1.1 2>/dev/null | awk '/src/ {for(i=1;i<=NF;i++) if ($i==\"src\") {print $(i+1); exit}}')"
+    fi
+    if [ -z "$detected" ] && command -v ifconfig >/dev/null 2>&1; then
+        detected="$(ifconfig 2>/dev/null | awk '/inet / && $2 !~ /^127\\./ {print $2; exit}')"
+    fi
     if [ -n "$detected" ]; then
         echo "$detected"
     else
@@ -369,10 +375,6 @@ try {
 } catch (err) {
   process.stderr.write(`WARN: Failed to patch OpenClaw gateway config: ${err.message}\n`);
 }
-
-PUBLIC_HOST="$(detect_public_host)"
-FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
-API_BASE_URL="http://${PUBLIC_HOST}:8000"
 NODE
 }
 
@@ -439,6 +441,13 @@ echo "Syncing OpenClaw gateway token..."
 sync_openclaw_token
 apply_workspace_openclaw_template
 configure_openclaw_gateway_defaults
+PUBLIC_HOST="$(detect_public_host)"
+if [ -z "$PUBLIC_HOST" ] || [ "$PUBLIC_HOST" = "undefined" ] || [ "$PUBLIC_HOST" = "null" ]; then
+    PUBLIC_HOST="localhost"
+fi
+FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
+API_BASE_URL="http://${PUBLIC_HOST}:8000"
+echo "OK: Host resolved as $PUBLIC_HOST"
 echo "Running managed sync preflight..."
 run_managed_sync sync > "$SCRIPT_DIR/.last-managed-sync.json"
 echo "OK: Managed sync report written to $SCRIPT_DIR/.last-managed-sync.json"
@@ -519,12 +528,6 @@ if ! lsof -i :3010 &> /dev/null; then
     echo "OK: Host updater started on port 3010"
 else
     echo "OK: Host updater already running on port 3010"
-fi
-
-# Mission Control clone
-if [ ! -d "$OPERATIONS_DIR" ]; then
-    git clone https://github.com/Chiraggoyal120/mission_control.git "$OPERATIONS_DIR"
-    echo "OK: Mission Control cloned"
 fi
 
 # [5/5] Convex setup

@@ -135,8 +135,11 @@ if not "!OPENCLAW_PUBLIC_HOST!"=="" (
   for /f %%h in ('node -e "const os=require('os');const n=os.networkInterfaces();let ip='';for(const k of Object.keys(n)){for(const i of (n[k]||[])){if(i.family==='IPv4'&&!i.internal){ip=i.address;break;}}if(ip)break;}console.log(ip||'localhost');"') do set PUBLIC_HOST=%%h
 )
 if "!PUBLIC_HOST!"=="" set "PUBLIC_HOST=localhost"
+if /I "!PUBLIC_HOST!"=="undefined" set "PUBLIC_HOST=localhost"
+if /I "!PUBLIC_HOST!"=="null" set "PUBLIC_HOST=localhost"
 set "FRONTEND_ORIGIN=http://!PUBLIC_HOST!:3000"
 set "API_BASE_URL=http://!PUBLIC_HOST!:8000"
+echo OK: Host resolved as !PUBLIC_HOST!
 
 set "MSYNC_FROM="
 set "MSYNC_BACKUP="
@@ -247,11 +250,6 @@ if %errorlevel% neq 0 (
   echo OK: Host updater already running on port 3010
 )
 
-if not exist "%OPERATIONS_DIR%" (
-  git clone https://github.com/Chiraggoyal120/mission_control.git "%OPERATIONS_DIR%"
-  echo OK: Mission Control cloned
-)
-
 echo.
 echo [5/5] Setting up Convex Database...
 echo ===================================================
@@ -310,6 +308,7 @@ if not "!CONVEX_URL!"=="" (
     echo.
     echo Deploying Convex schema to cloud...
     cd "%OPERATIONS_DIR%\backend"
+    call npm install
     set CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!
     call npx convex deploy
     if %errorlevel% neq 0 (
