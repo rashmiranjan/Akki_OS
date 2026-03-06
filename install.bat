@@ -2,6 +2,7 @@
 setlocal enabledelayedexpansion
 
 set "INSTALL_MODE=install"
+set "EXPLICIT_MODE=false"
 set "NON_INTERACTIVE=false"
 set "DRY_RUN=false"
 set "FROM_VERSION="
@@ -16,6 +17,7 @@ if /I "%~1"=="--upgrade" (
 )
 if /I "%~1"=="--mode" (
   set "INSTALL_MODE=%~2"
+  set "EXPLICIT_MODE=true"
   shift
   shift
   goto parse_args
@@ -51,6 +53,9 @@ set "OPERATIONS_DIR=%~dp0mission_control"
 set "OPENCLAW_WORKSPACE_ROOT=%~dp0workspace"
 set "AGENTS_ROOT=%~dp0agents"
 set "OPENCLAW_CONFIG_PATH=%USERPROFILE%\.openclaw\openclaw.json"
+set "HOME_STATE_FILE=%USERPROFILE%\.akki\state\install-state.json"
+set "REPO_STATE_FILE=%~dp0.akki\state\install-state.json"
+set "OPERATIONS_ENV_FILE=%OPERATIONS_DIR%\.env"
 
 if /I not "%INSTALL_MODE%"=="install" if /I not "%INSTALL_MODE%"=="upgrade" (
   echo ERROR: --mode must be install or upgrade
@@ -122,6 +127,33 @@ for /f "usebackq tokens=1,* delims==" %%a in ("%~dp0.env") do (
   if "%%a"=="OPENCLAW_PUBLIC_HOST" set OPENCLAW_PUBLIC_HOST=%%b
   if "%%a"=="OPENCLAW_CONTROL_UI_ALLOWED_ORIGINS" set OPENCLAW_CONTROL_UI_ALLOWED_ORIGINS=%%b
 )
+
+set "EXISTING_INSTALL=false"
+if exist "%OPENCLAW_CONFIG_PATH%" set "EXISTING_INSTALL=true"
+if exist "%OPERATIONS_ENV_FILE%" set "EXISTING_INSTALL=true"
+if exist "%HOME_STATE_FILE%" set "EXISTING_INSTALL=true"
+if exist "%REPO_STATE_FILE%" set "EXISTING_INSTALL=true"
+
+if /I "!EXISTING_INSTALL!"=="true" (
+  if /I "%INSTALL_MODE%"=="install" (
+    if /I "%EXPLICIT_MODE%"=="false" (
+      set "INSTALL_MODE=upgrade"
+      echo WARN: Existing install detected; auto-switching mode to upgrade.
+    ) else (
+      echo WARN: Explicit --mode install on an existing setup.
+      if /I "%NON_INTERACTIVE%"=="true" (
+        echo ERROR: Refusing explicit install mode in non-interactive run on existing setup. Use --upgrade.
+        exit /b 1
+      )
+      set /p CONFIRM_INSTALL_MODE="Proceed with install mode anyway? [y/N]: "
+      if /I not "!CONFIRM_INSTALL_MODE!"=="y" if /I not "!CONFIRM_INSTALL_MODE!"=="yes" (
+        echo Aborted. Re-run with --upgrade.
+        exit /b 1
+      )
+    )
+  )
+)
+echo Effective mode: %INSTALL_MODE%
 
 if "!OPENCLAW_GATEWAY_BIND!"=="" (
   set "DESIRED_GATEWAY_BIND=loopback"
@@ -283,6 +315,7 @@ move /y "%~dp0.env.tmp" "%~dp0.env" >nul
 echo CONVEX_URL=!CONVEX_URL!>> "%~dp0.env"
 echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%~dp0.env"
 
+set "MC_DEFAULTS_FILE=%temp%\akki-mc-defaults-%random%%random%.env"
 (
   if "!PUBLIC_HOST!"=="" set "PUBLIC_HOST=localhost"
   if /I "!PUBLIC_HOST!"=="undefined" set "PUBLIC_HOST=localhost"
@@ -305,8 +338,17 @@ echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%~dp0.env"
   echo UPDATER_TOKEN=!OPENCLAW_TOKEN!
   echo CONVEX_URL=!CONVEX_URL!
   echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!
-) > "%OPERATIONS_DIR%\.env"
-echo OK: Mission Control .env synced
+) > "!MC_DEFAULTS_FILE!"
+
+if not exist "%OPERATIONS_ENV_FILE%" type nul > "%OPERATIONS_ENV_FILE%"
+for /f "usebackq tokens=1,* delims==" %%k in ("!MC_DEFAULTS_FILE!") do (
+  findstr /b /c:"%%k=" "%OPERATIONS_ENV_FILE%" >nul 2>&1
+  if errorlevel 1 (
+    echo %%k=%%l>> "%OPERATIONS_ENV_FILE%"
+  )
+)
+del /f /q "!MC_DEFAULTS_FILE!" >nul 2>&1
+echo OK: Mission Control .env synced (preserve-first: existing keys kept, missing keys appended)
 
 if not "!CONVEX_URL!"=="" (
   if not "!CONVEX_DEPLOY_KEY!"=="" (

@@ -8,7 +8,7 @@ This document defines how Akki_OS installs on top of existing OpenClaw setups, h
 | Scenario | Command | Expected Behavior |
 |---|---|---|
 | Fresh machine | `bash install.sh --mode install` | Runs full onboarding, config sync, managed sync, Mission Control bootstrap |
-| Existing OpenClaw, first Akki install | `bash install.sh --mode install` | Reuses OpenClaw runtime/config, applies Akki workspace template, registers managed agents |
+| Existing OpenClaw, plain install command | `bash install.sh` or `bash install.sh --mode install` | Existing setup is detected; installer routes to safe upgrade path unless explicit install override is confirmed |
 | Existing Akki installation upgrade | `bash install.sh --upgrade` | Skips onboarding, backs up state, applies managed sync with conflict preservation |
 | Windows upgrade | `install.bat --upgrade` | Same policy as Linux/macOS; skips onboarding and preserves local skill edits |
 
@@ -53,6 +53,13 @@ Default policy is **preserve local edits**.
 - User-customized destination skills that differ from managed source are **not overwritten**.
 - Incoming managed update for conflicting skill is staged under `workspace/skills/_incoming/<skill>`.
 - Conflict details are recorded in sync report logs.
+
+## Mission Control Env Policy
+
+- `mission_control/.env` uses preserve-first merge behavior.
+- Existing values are source of truth (managed keys are not rewritten).
+- Unknown/custom keys are preserved.
+- Only missing keys are appended from generated defaults.
 
 ## State And Metadata
 

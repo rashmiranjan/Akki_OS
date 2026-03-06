@@ -28,7 +28,8 @@ Top-level directories and roles:
 - `--backup-dir`
 
 Install mode:
-- may run `openclaw onboard`.
+- runs `openclaw onboard` for first-time setup.
+- if existing install is detected and no explicit mode override is provided, installer auto-switches to upgrade.
 
 Upgrade mode:
 - must skip onboarding.
@@ -67,6 +68,7 @@ These proxy to host updater with token auth (`UPDATER_URL` + `UPDATER_TOKEN`).
 - Windows installer ensures `npm install` in `mission_control/backend` before `npx convex deploy`.
 - Host/IP resolution is sanitized and cannot write blank URL fields into env files.
 - `.env` parsing in Windows uses `tokens=1,*` to avoid truncating values containing `=`.
+- Mission Control env handling is preserve-first (existing managed values are not rewritten; only missing keys are appended).
 
 ## Practical interpretation
 This repo is now a single deployable/upgradeable unit:

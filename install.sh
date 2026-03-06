@@ -16,6 +16,7 @@ detect_os() {
 }
 OS="$(detect_os)"
 INSTALL_MODE="install"
+EXPLICIT_MODE=false
 NON_INTERACTIVE=false
 DRY_RUN=false
 FROM_VERSION=""
@@ -29,6 +30,7 @@ while [ $# -gt 0 ]; do
         --mode)
             shift
             INSTALL_MODE="${1:-install}"
+            EXPLICIT_MODE=true
             ;;
         --non-interactive)
             NON_INTERACTIVE=true
@@ -205,6 +207,9 @@ OPENCLAW_WORKSPACE_ROOT="$SCRIPT_DIR/workspace"
 AGENTS_ROOT="$SCRIPT_DIR/agents"
 OPENCLAW_CONFIG_PATH="${HOME}/.openclaw/openclaw.json"
 OPENCLAW_WORKSPACE_CONFIG_TEMPLATE="${OPENCLAW_WORKSPACE_ROOT}/openclaw.json"
+HOME_STATE_FILE="${HOME}/.akki/state/install-state.json"
+REPO_STATE_FILE="${SCRIPT_DIR}/.akki/state/install-state.json"
+OPERATIONS_ENV_FILE="${OPERATIONS_DIR}/.env"
 if [ -n "${OPENCLAW_GATEWAY_BIND:-}" ]; then
     DESIRED_GATEWAY_BIND="$OPENCLAW_GATEWAY_BIND"
 elif [ "$OS" = "linux" ]; then
@@ -247,6 +252,13 @@ upsert_env() {
     fi
 }
 
+detect_existing_install() {
+    if [ -f "$OPENCLAW_CONFIG_PATH" ] || [ -f "$OPERATIONS_ENV_FILE" ] || [ -f "$HOME_STATE_FILE" ] || [ -f "$REPO_STATE_FILE" ]; then
+        return 0
+    fi
+    return 1
+}
+
 sanitize_host() {
     local raw="${1:-}"
     local cleaned
@@ -271,6 +283,19 @@ read_env_fallback() {
     if [ -n "$value" ]; then
         printf -v "$key" "%s" "$value"
     fi
+}
+
+merge_env_preserve_existing() {
+    local env_file="$1"
+    local defaults_file="$2"
+    touch "$env_file"
+    while IFS='=' read -r key value; do
+        [ -z "$key" ] && continue
+        if grep -q "^${key}=" "$env_file"; then
+            continue
+        fi
+        echo "${key}=${value}" >> "$env_file"
+    done < "$defaults_file"
 }
 
 sync_openclaw_token() {
@@ -419,6 +444,25 @@ source "$SCRIPT_DIR/.env"
 configure_npm_user_prefix
 read_env_fallback "CONVEX_URL"
 read_env_fallback "CONVEX_DEPLOY_KEY"
+
+if detect_existing_install; then
+    if [ "$INSTALL_MODE" = "install" ] && [ "$EXPLICIT_MODE" = false ]; then
+        INSTALL_MODE="upgrade"
+        echo "WARN: Existing install detected; auto-switching mode to upgrade."
+    elif [ "$INSTALL_MODE" = "install" ] && [ "$EXPLICIT_MODE" = true ]; then
+        echo "WARN: Explicit --mode install on an existing setup."
+        if [ "$NON_INTERACTIVE" = true ]; then
+            echo "ERROR: Refusing explicit install mode in non-interactive run on existing setup. Use --upgrade."
+            exit 1
+        fi
+        read -p "Proceed with install mode anyway? [y/N]: " CONFIRM_INSTALL_MODE
+        case "$CONFIRM_INSTALL_MODE" in
+            y|Y|yes|YES) ;;
+            *) echo "Aborted. Re-run with --upgrade."; exit 1 ;;
+        esac
+    fi
+fi
+echo "Effective mode: $INSTALL_MODE"
 
 run_managed_sync() {
     local action="$1"
@@ -587,8 +631,9 @@ PUBLIC_HOST="$(sanitize_host "${OPENCLAW_PUBLIC_HOST:-$PUBLIC_HOST}")"
 FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
 API_BASE_URL="http://${PUBLIC_HOST}:8000"
 
-# Mission Control .env — always refresh so token stays in sync with OpenClaw
-cat > "$OPERATIONS_DIR/.env" << EOF
+# Mission Control .env — preserve-first merge: keep existing values and append missing keys.
+MC_DEFAULTS_FILE="$(mktemp)"
+cat > "$MC_DEFAULTS_FILE" << EOF
 FRONTEND_PORT=3000
 BACKEND_PORT=8000
 CORS_ORIGINS=${FRONTEND_ORIGIN},http://localhost:3000,http://127.0.0.1:3000
@@ -606,7 +651,9 @@ CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY
 UPDATER_URL=${UPDATER_URL:-http://host.docker.internal:3010}
 UPDATER_TOKEN=${UPDATER_TOKEN:-$OPENCLAW_TOKEN}
 EOF
-echo "OK: Mission Control .env synced"
+merge_env_preserve_existing "$OPERATIONS_ENV_FILE" "$MC_DEFAULTS_FILE"
+rm -f "$MC_DEFAULTS_FILE"
+echo "OK: Mission Control .env synced (preserve-first: existing keys kept, missing keys appended)"
 
 # Deploy Convex schema — Docker se PEHLE
 if [ -n "$CONVEX_URL" ] && [ -n "$CONVEX_DEPLOY_KEY" ]; then
