@@ -9,6 +9,20 @@ cd Akki_OS
 bash install.sh
 ```
 
+## 🔄 Upgrade
+```bash
+# Linux/macOS
+bash install.sh --upgrade --non-interactive
+
+# Windows
+install.bat --upgrade --non-interactive
+```
+
+Dry run:
+```bash
+bash install.sh --upgrade --dry-run
+```
+
 ## 🤖 9 AI Agents
 
 | Agent | Role | Skill |

@@ -13,9 +13,28 @@ type User = {
     created_at: string;
 };
 
+type UpgradeCheck = {
+    success?: boolean;
+    updateAvailable?: boolean;
+    manifestVersion?: string;
+    installedVersion?: string;
+    collisions?: Array<{ kind: string; name?: string }>;
+    error?: string;
+};
+
+type UpgradeJob = {
+    id: string;
+    status: string;
+    logs: string[];
+    error?: string;
+};
+
 export default function AdminPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [upgradeCheck, setUpgradeCheck] = useState<UpgradeCheck | null>(null);
+    const [upgradeJob, setUpgradeJob] = useState<UpgradeJob | null>(null);
+    const [upgradeBusy, setUpgradeBusy] = useState(false);
 
     const fetchUsers = async () => {
         try {
@@ -33,6 +52,63 @@ export default function AdminPage() {
     };
 
     useEffect(() => { fetchUsers(); }, []);
+
+    const checkForUpgrades = async () => {
+        setUpgradeBusy(true);
+        try {
+            const token = getLocalAuthToken();
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/system/upgrade/check`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            setUpgradeCheck(data);
+        } catch (err: any) {
+            setUpgradeCheck({ error: err?.message || "Upgrade check failed" });
+        } finally {
+            setUpgradeBusy(false);
+        }
+    };
+
+    const runUpgrade = async () => {
+        setUpgradeBusy(true);
+        try {
+            const token = getLocalAuthToken();
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/system/upgrade/run`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ pullLatest: true }),
+            });
+            const data = await res.json();
+            if (data.jobId) {
+                await pollUpgradeStatus(data.jobId);
+            }
+        } catch (err) {
+            console.error("Upgrade failed to start", err);
+        } finally {
+            setUpgradeBusy(false);
+        }
+    };
+
+    const pollUpgradeStatus = async (jobId: string) => {
+        const token = getLocalAuthToken();
+        for (let i = 0; i < 120; i += 1) {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/system/upgrade/status/${jobId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.job) {
+                setUpgradeJob(data.job);
+                if (data.job.status === "success" || data.job.status === "failed") {
+                    break;
+                }
+            }
+            await new Promise((r) => setTimeout(r, 1500));
+        }
+    };
 
     return (
         <DashboardShell>
@@ -100,6 +176,48 @@ export default function AdminPage() {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm p-8 space-y-4">
+                        <h2 className="text-xl font-black text-slate-900">System Upgrade</h2>
+                        <div className="flex flex-wrap gap-3">
+                            <button
+                                type="button"
+                                onClick={checkForUpgrades}
+                                disabled={upgradeBusy}
+                                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-60"
+                            >
+                                Check for updates
+                            </button>
+                            <button
+                                type="button"
+                                onClick={runUpgrade}
+                                disabled={upgradeBusy}
+                                className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold disabled:opacity-60"
+                            >
+                                Upgrade now
+                            </button>
+                        </div>
+                        {upgradeCheck && (
+                            <div className="text-sm text-slate-700 space-y-1">
+                                <div>Installed: <span className="font-mono">{upgradeCheck.installedVersion || "unknown"}</span></div>
+                                <div>Latest: <span className="font-mono">{upgradeCheck.manifestVersion || "unknown"}</span></div>
+                                <div>Update available: <span className="font-bold">{String(Boolean(upgradeCheck.updateAvailable))}</span></div>
+                                {upgradeCheck.collisions && upgradeCheck.collisions.length > 0 ? (
+                                    <div className="text-amber-700">Local skill edits detected: {upgradeCheck.collisions.length}</div>
+                                ) : null}
+                                {upgradeCheck.error ? <div className="text-rose-700">{upgradeCheck.error}</div> : null}
+                            </div>
+                        )}
+                        {upgradeJob && (
+                            <div className="border border-slate-200 rounded-2xl p-4">
+                                <div className="text-sm font-bold">Job: {upgradeJob.id}</div>
+                                <div className="text-sm">Status: {upgradeJob.status}</div>
+                                {upgradeJob.error ? <div className="text-sm text-rose-700">{upgradeJob.error}</div> : null}
+                                <pre className="mt-3 max-h-64 overflow-auto text-[11px] bg-slate-950 text-slate-100 rounded-xl p-3">
+{(upgradeJob.logs || []).join("\n")}
+                                </pre>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

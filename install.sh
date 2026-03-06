@@ -15,6 +15,48 @@ detect_os() {
     esac
 }
 OS="$(detect_os)"
+INSTALL_MODE="install"
+NON_INTERACTIVE=false
+DRY_RUN=false
+FROM_VERSION=""
+CUSTOM_BACKUP_DIR=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --upgrade)
+            INSTALL_MODE="upgrade"
+            ;;
+        --mode)
+            shift
+            INSTALL_MODE="${1:-install}"
+            ;;
+        --non-interactive)
+            NON_INTERACTIVE=true
+            ;;
+        --dry-run)
+            DRY_RUN=true
+            ;;
+        --from-version)
+            shift
+            FROM_VERSION="${1:-}"
+            ;;
+        --backup-dir)
+            shift
+            CUSTOM_BACKUP_DIR="${1:-}"
+            ;;
+        *)
+            echo "WARN: Unknown option '$1' (ignored)"
+            ;;
+    esac
+    shift
+done
+
+if [ "$INSTALL_MODE" != "install" ] && [ "$INSTALL_MODE" != "upgrade" ]; then
+    echo "ERROR: --mode must be install or upgrade"
+    exit 1
+fi
+
+echo "Mode: $INSTALL_MODE (dry-run=$DRY_RUN, non-interactive=$NON_INTERACTIVE)"
 
 # [1/5] Node.js check + auto-install (Node 22+ required by OpenClaw)
 echo "[1/5] Checking Node.js..."
@@ -23,6 +65,10 @@ if command -v node &> /dev/null; then
     NODE_MAJOR=$(node -v 2>/dev/null | sed 's/^v//; s/\..*//')
 fi
 if [ -z "$NODE_MAJOR" ] || [ "$NODE_MAJOR" -lt 22 ] 2>/dev/null; then
+    if [ "$DRY_RUN" = true ]; then
+        echo "ERROR: Dry-run requires Node.js 22+ already installed."
+        exit 1
+    fi
     if [ -n "$NODE_MAJOR" ]; then
         echo "Node.js v$(node -v 2>/dev/null) found, upgrading to v22+..."
     else
@@ -61,6 +107,10 @@ fi
 # [2/5] Docker check + auto-install
 echo "[2/5] Checking Docker..."
 if ! command -v docker &> /dev/null; then
+    if [ "$DRY_RUN" = true ]; then
+        echo "ERROR: Dry-run requires Docker already installed."
+        exit 1
+    fi
     echo "Docker not found. Installing automatically..."
     if [ "$OS" = "linux" ]; then
         if command -v curl &> /dev/null; then
@@ -128,6 +178,10 @@ fi
 echo ""
 echo "[3/5] Installing OpenClaw..."
 if ! command -v openclaw &> /dev/null; then
+    if [ "$DRY_RUN" = true ]; then
+        echo "ERROR: Dry-run requires OpenClaw already installed."
+        exit 1
+    fi
     echo "Installing OpenClaw globally with sudo npm (this will typically use /usr/local)..."
     if ! command -v npm &> /dev/null; then
         echo "ERROR: npm not found even though Node.js is installed. Install npm and re-run."
@@ -336,19 +390,58 @@ echo "OK: Loading .env"
 source "$SCRIPT_DIR/.env"
 configure_npm_user_prefix
 
-# OpenClaw onboard (CLI wizard only; we'll install a systemd service ourselves)
-echo ""
-echo "OpenClaw will now guide you through full setup."
-echo ""
-openclaw onboard \
-    --workspace "$SCRIPT_DIR/workspace" \
-    --gateway-bind "$DESIRED_GATEWAY_BIND"
+run_managed_sync() {
+    local action="$1"
+    local cmd=(node "$SCRIPT_DIR/tools/managed_sync.js"
+      --action "$action"
+      --mode "$INSTALL_MODE"
+      --repo-root "$SCRIPT_DIR"
+      --openclaw-config "$OPENCLAW_CONFIG_PATH"
+      --manifest "$SCRIPT_DIR/releases/manifest.json"
+      --state-file "$HOME/.akki/state/install-state.json")
+    if [ -n "$FROM_VERSION" ]; then
+      cmd+=(--from-version "$FROM_VERSION")
+    fi
+    if [ -n "$CUSTOM_BACKUP_DIR" ]; then
+      cmd+=(--backup-dir "$CUSTOM_BACKUP_DIR")
+    fi
+    if [ "$DRY_RUN" = true ]; then
+      cmd+=(--dry-run)
+    fi
+    "${cmd[@]}"
+}
+
+if [ "$DRY_RUN" = true ]; then
+    echo "DRY-RUN: Skipping mutating operations; showing planned sync/report only."
+    run_managed_sync check
+    run_managed_sync sync
+    exit 0
+fi
+
+# OpenClaw onboard (install mode only; upgrade mode must not re-onboard)
+if [ "$INSTALL_MODE" = "install" ]; then
+    echo ""
+    echo "OpenClaw will now guide you through full setup."
+    echo ""
+    openclaw onboard \
+        --workspace "$SCRIPT_DIR/workspace" \
+        --gateway-bind "$DESIRED_GATEWAY_BIND"
+else
+    if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+        echo "ERROR: Upgrade mode requires existing OpenClaw config at $OPENCLAW_CONFIG_PATH"
+        exit 1
+    fi
+    echo "OK: Upgrade mode detected existing OpenClaw config; onboarding skipped."
+fi
 
 echo ""
 echo "Syncing OpenClaw gateway token..."
 sync_openclaw_token
 apply_workspace_openclaw_template
 configure_openclaw_gateway_defaults
+echo "Running managed sync preflight..."
+run_managed_sync sync > "$SCRIPT_DIR/.last-managed-sync.json"
+echo "OK: Managed sync report written to $SCRIPT_DIR/.last-managed-sync.json"
 
 # Install OpenClaw gateway as a systemd service (system scope) for 24/7 uptime
 if command -v systemctl &> /dev/null; then
@@ -383,15 +476,24 @@ echo ""
 echo "[4/5] Setting up Agents + Skills + Webhook + Mission Control..."
 
 # Register agents
+AGENT_CONFLICT_LOG="$SCRIPT_DIR/.akki-agent-conflicts.log"
+mkdir -p "$SCRIPT_DIR/.akki"
+: > "$AGENT_CONFLICT_LOG"
 for agent in jarvis fury loki shuri atlas echo oracle pulse vision; do
-    openclaw agents add $agent --workspace "$SCRIPT_DIR/agents/$agent" &> /dev/null || true
-    echo "  OK: $agent registered"
+    AGENT_OUTPUT="$(openclaw agents add "$agent" --workspace "$SCRIPT_DIR/agents/$agent" 2>&1)"
+    AGENT_EXIT=$?
+    if [ $AGENT_EXIT -eq 0 ]; then
+      echo "  OK: $agent registered"
+    elif echo "$AGENT_OUTPUT" | grep -qi "already"; then
+      echo "  OK: $agent already exists (preserved)"
+    else
+      echo "  WARN: $agent registration issue"
+      echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $agent :: $AGENT_OUTPUT" >> "$AGENT_CONFLICT_LOG"
+    fi
 done
 
 # Copy skills
-mkdir -p "$SCRIPT_DIR/workspace/skills"
-cp -r "$SCRIPT_DIR/skills/"* "$SCRIPT_DIR/workspace/skills/" 2>/dev/null || true
-echo "OK: Skills copied"
+echo "OK: Skills sync managed by tools/managed_sync.js (local edits preserved)"
 
 # Start webhook — port check pehle
 if ! lsof -i :3003 &> /dev/null; then
@@ -406,6 +508,17 @@ if ! lsof -i :3003 &> /dev/null; then
     echo "OK: Webhook started on port 3003"
 else
     echo "OK: Webhook already running on port 3003"
+fi
+
+# Start host updater service (local-only, token-protected)
+if ! lsof -i :3010 &> /dev/null; then
+    mkdir -p "$HOME/.akki/state"
+    UPDATER_TOKEN_VALUE="${UPDATER_TOKEN:-$OPENCLAW_TOKEN}"
+    nohup env UPDATER_TOKEN="$UPDATER_TOKEN_VALUE" UPDATER_REPO_ROOT="$SCRIPT_DIR" node "$SCRIPT_DIR/host_updater/server.js" > "$HOME/.akki/state/host-updater.log" 2>&1 &
+    sleep 1
+    echo "OK: Host updater started on port 3010"
+else
+    echo "OK: Host updater already running on port 3010"
 fi
 
 # Mission Control clone
@@ -425,9 +538,17 @@ echo "==================================================="
 echo ""
 
 if [ -z "$CONVEX_URL" ]; then
+    if [ "$NON_INTERACTIVE" = true ]; then
+      echo "ERROR: CONVEX_URL missing in non-interactive mode"
+      exit 1
+    fi
     read -p "Enter Convex Cloud URL (https://xxx.convex.cloud): " CONVEX_URL
 fi
 if [ -z "$CONVEX_DEPLOY_KEY" ]; then
+    if [ "$NON_INTERACTIVE" = true ]; then
+      echo "ERROR: CONVEX_DEPLOY_KEY missing in non-interactive mode"
+      exit 1
+    fi
     read -p "Enter Convex Deploy Key (dev:xxx|yyy): " CONVEX_DEPLOY_KEY
 fi
 upsert_env "CONVEX_URL" "$CONVEX_URL"
@@ -449,6 +570,8 @@ NEXT_PUBLIC_API_URL=${API_BASE_URL}
 BETTER_AUTH_URL=${API_BASE_URL}
 CONVEX_URL=$CONVEX_URL
 CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY
+UPDATER_URL=${UPDATER_URL:-http://host.docker.internal:3010}
+UPDATER_TOKEN=${UPDATER_TOKEN:-$OPENCLAW_TOKEN}
 EOF
 echo "OK: Mission Control .env synced"
 

@@ -27,6 +27,7 @@ import { createDraft } from './controllers/draftController';
 import { sendMessage, getHistory } from './controllers/chatController';
 import { getMemory, upsertMemory, deleteMemory, getMemoryStats } from './controllers/memoryController';
 import { getOnboarding, completeOnboarding } from './controllers/onboardingController';
+import { postUpgradeCheck, postUpgradeRun, getUpgradeJobStatus } from './controllers/systemController';
 import { initCronJobs } from './services/cronService';
 import { convex, convexApi } from './lib/convexClient';
 
@@ -82,6 +83,9 @@ app.post('/api/v1/strategy', async (req: any, res: any) => {
 // Onboarding routes
 app.get('/api/v1/onboarding', getOnboarding);
 app.post('/api/v1/onboarding/complete', completeOnboarding);
+app.post('/api/v1/system/upgrade/check', postUpgradeCheck);
+app.post('/api/v1/system/upgrade/run', postUpgradeRun);
+app.get('/api/v1/system/upgrade/status/:id', getUpgradeJobStatus);
 
 // Start persistent Gateway connection
 GatewayService.getInstance().connect().catch(console.error);
@@ -90,5 +94,4 @@ app.listen(PORT, () => {
     console.log(`ðŸš€ Mission Control running on port ${PORT}`);
     initCronJobs();
 });
-
 

@@ -1,0 +1,29 @@
+{
+  "version": "1.1.0",
+  "min_openclaw_version": "0.0.0",
+  "components": {
+    "agents": {
+      "path": "agents",
+      "checksum": "f279839ecc604a83ff21c4eb9068ae031bfa8e48d3ed7a4eaaa3883159230c12"
+    },
+    "skills": {
+      "path": "skills",
+      "checksum": "eb7940927e5d640da8cd1e0617ba002fd3963696ed8e2d560f7b8fbbec0bd711"
+    },
+    "mission_control": {
+      "path": "mission_control",
+      "checksum": "0f8d2a285c64b4159fd3220576d6a0202f64904bb8951ae9a3c1a408424b1720"
+    },
+    "workspace_templates": {
+      "path": "workspace",
+      "checksum": "062e4d5cf73559230c66b8a0e2210d8f4b1991f74acd8916ea888164e5ecad75"
+    }
+  },
+  "migrations": [
+    {
+      "id": "2026-03-upgrade-contract",
+      "description": "Introduce install/upgrade split, managed sync, and state tracking"
+    }
+  ],
+  "generated_at": "2026-03-06T04:41:03.321Z"
+}

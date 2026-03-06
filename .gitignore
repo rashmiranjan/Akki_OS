@@ -4,3 +4,6 @@ credentials/
 *.log
 node_modules/
 .DS_Store
+.akki/
+.last-managed-sync.json
+workspace/skills/_incoming/
