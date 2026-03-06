@@ -7,3 +7,4 @@ node_modules/
 .akki/
 .last-managed-sync.json
 workspace/skills/_incoming/
+docs/
