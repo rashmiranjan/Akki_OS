@@ -1,34 +1,40 @@
 # Project Understanding (Current)
 
 ## 1) What this project is
-Akki_OS is now a two-layer monorepo built around OpenClaw:
+Akki_OS is a two-layer monorepo built around OpenClaw:
 
-1. `platform/bootstrap` (Akki layer): installs and provisions the runtime.
-2. `platform/operations` (Mission Control layer): runs dashboard/API/chat/ops after setup.
+1. `platform/bootstrap` (Akki layer): installation, upgrade, and provisioning runtime.
+2. `platform/operations` (Mission Control layer): dashboard/API/chat operations after setup.
 
-The system goal is: bootstrap OpenClaw + agents + skills once, then operate through Mission Control continuously.
+The goal is: install once, then run and upgrade safely without breaking existing OpenClaw state.
 
 ## 2) Layered architecture
 
-### A. Bootstrap layer (installer + provisioning)
+### A. Bootstrap layer (installer + provisioning + upgrades)
 Primary files:
 - `install.sh`
 - `install.bat`
 - `start.bat`
+- `tools/managed_sync.js`
+- `releases/manifest.json`
+- `host_updater/server.js`
 - `agents/`
 - `skills/`
 - `workspace/`
 
 Responsibilities:
 - Verify/install Node, Docker, OpenClaw.
-- Run `openclaw onboard`.
-- Sync real gateway token from `~/.openclaw/openclaw.json` into root `.env`.
-- Patch OpenClaw gateway config for deploy context (bind mode + Control UI origins).
-- Optionally merge `workspace/openclaw.json` into runtime OpenClaw config if present.
-- Register agents from `agents/*`.
-- Copy skills to `workspace/skills`.
+- Support explicit modes:
+  - install mode: can run `openclaw onboard`.
+  - upgrade mode: must skip onboarding.
+- Sync OpenClaw token from `~/.openclaw/openclaw.json` into root `.env`.
+- Patch OpenClaw gateway config (bind mode + control UI origins).
+- Apply optional `workspace/openclaw.json` merge into runtime OpenClaw config.
+- Register managed agents from `agents/*` with conflict logging.
+- Run managed skill sync via `tools/managed_sync.js` with local-edit preservation.
 - Start webhook bridge (`skills/webhook-server/scripts/server.js`).
-- Prepare `mission_control/.env` with host-IP based URLs (not hardcoded localhost only).
+- Start host updater service (`host_updater/server.js`) for Mission Control-triggered upgrades.
+- Regenerate `mission_control/.env` with resolved host/IP URLs.
 - Deploy Convex schema from `mission_control/backend`.
 - Start Mission Control docker services.
 
@@ -40,37 +46,42 @@ Primary files:
 
 Responsibilities:
 - Expose dashboard/UI (`:3000`) and backend API (`:8000`).
-- Connect backend to OpenClaw gateway over WebSocket.
+- Connect backend to OpenClaw gateway via WebSocket.
 - Provide APIs for activity, drafts, chat, memory, onboarding, strategy.
-- Store app data in Convex (via `mission_control/backend/convex/*`).
-- Manage authenticated operations and user workflow.
+- Provide system-upgrade APIs that proxy to host updater:
+  - `POST /api/v1/system/upgrade/check`
+  - `POST /api/v1/system/upgrade/run`
+  - `GET /api/v1/system/upgrade/status/:id`
 
 ## 3) Runtime data/event flow
 
-1. OpenClaw agents run with workspaces from this repo (`workspace/`, `agents/*`).
+1. OpenClaw agents run using repo workspaces (`workspace/`, `agents/*`).
 2. Agent/skill events post to local webhook (`http://localhost:3003`).
-3. Webhook forwards events to Mission Control backend `POST /api/v1/activity`.
-4. Mission Control backend ingests and persists into Convex (`activity`, `drafts`, etc.).
-5. Frontend reads from backend APIs and renders dashboard feeds/queues.
+3. Webhook forwards to Mission Control backend `POST /api/v1/activity`.
+4. Mission Control stores activity/drafts/memory using Convex contract.
+5. Frontend consumes backend APIs.
 
-Webhook fallback behavior:
-- Primary sink: Mission Control API.
-- Optional fallback direct Convex write if `WEBHOOK_FALLBACK_DIRECT_CONVEX=true`.
+Upgrade flow:
+1. CLI: `install.sh --upgrade` or `install.bat --upgrade`.
+2. Installer runs managed sync using release manifest + state tracking.
+3. Conflicting local skills are preserved; incoming updates staged in `workspace/skills/_incoming/*`.
+4. Mission Control upgrade button can trigger host updater to run allowlisted upgrade commands.
 
 ## 4) Key integration decisions
 
-1. Mission Control is the operational source of truth for backend APIs and Convex contract.
-2. Akki bootstrap remains the source of truth for provisioning and OpenClaw/agent setup.
-3. No deep app merge: layers stay separate but tightly integrated via env + API contract.
-4. `mission_control/` is vendored in this repo (not treated as a submodule).
+1. `mission_control/` is vendored in this repo (no runtime `git clone mission_control` step).
+2. Bootstrap scripts own installation + upgrade orchestration.
+3. Mission Control owns operations UX and upgrade-control APIs.
+4. Upgrade behavior is non-destructive by default (preserve local edits).
 
 ## 5) Important configuration behavior
 
 ### Root `.env`
-Managed by installer for:
-- `OPENCLAW_TOKEN` (synced post-onboard)
+Managed/read by installer for:
+- `OPENCLAW_TOKEN`
 - `CONVEX_URL`
 - `CONVEX_DEPLOY_KEY`
+- optional host-related overrides (`OPENCLAW_PUBLIC_HOST`, etc.)
 
 ### Mission Control `.env`
 Regenerated by installer and includes:
@@ -79,59 +90,51 @@ Regenerated by installer and includes:
 - `OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789`
 - `OPENCLAW_WORKSPACE_ROOT`
 - `AGENTS_ROOT`
-- `NEXT_PUBLIC_API_URL=http://<host-ip>:8000`
-- `BETTER_AUTH_URL=http://<host-ip>:8000`
-- `CORS_ORIGIN` / `CORS_ORIGINS` with host IP + localhost fallbacks
+- `NEXT_PUBLIC_API_URL=http://<resolved-host>:8000`
+- `BETTER_AUTH_URL=http://<resolved-host>:8000`
+- `CORS_ORIGIN` / `CORS_ORIGINS`
+- `UPDATER_URL=http://host.docker.internal:3010`
+- `UPDATER_TOKEN`
 
 ### OpenClaw runtime config
-`~/.openclaw/openclaw.json` is patched during install to avoid common VPS failures:
-- `gateway.bind` set by deploy mode (Linux default `lan`, Windows default `loopback` unless overridden).
-- `gateway.controlUi.allowedOrigins` set.
-- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` when non-loopback bind is used.
+`~/.openclaw/openclaw.json` is patched by installer:
+- `gateway.bind`
+- `gateway.controlUi.allowedOrigins`
+- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` (non-loopback bind)
 
-## 6) High-value files to read first
+## 6) Upgrade metadata and state
 
-If a future task needs quick codebase understanding, read in this order:
-
-1. `install.sh`
-2. `skills/webhook-server/scripts/server.js`
-3. `mission_control/backend/src/index.ts`
-4. `mission_control/backend/src/controllers/activityController.ts`
-5. `mission_control/backend/src/services/gatewayService.ts`
-6. `mission_control/backend/src/controllers/onboardingController.ts`
-7. `mission_control/compose.yml`
-8. `docs/merge/architecture.md`
+- Release manifest: `releases/manifest.json`
+- Manifest checksum builder: `tools/build_release_manifest.js`
+- Local install state: `~/.akki/state/install-state.json` (repo fallback `.akki/state/*` if home path not writable)
+- Sync report: `~/.akki/state/logs/last-sync-report.json`
+- Host-updater job state: `~/.akki/state/upgrade-jobs.json`
 
 ## 7) Operational checks / quick diagnostics
 
 ### Backend health
 `curl http://localhost:8000/healthz`
 
-### Backend logs
-`docker compose logs -f --tail=200 backend`
+### Env sanity
+`grep -E "CORS_ORIGIN|NEXT_PUBLIC_API_URL|BETTER_AUTH_URL" mission_control/.env`
 
-### Frontend logs
-`docker compose logs -f --tail=200 frontend`
+### Upgrade check API
+`curl -X POST http://localhost:8000/api/v1/system/upgrade/check -H "Authorization: Bearer <token>"`
 
-### Docker access issue
-If `permission denied /var/run/docker.sock`, use `sudo` or add user to `docker` group.
+### Host updater process
+`ss -ltnp | grep 3010` or `netstat -ano | find ":3010"` (Windows)
 
 ### Gateway connection issue (container -> OpenClaw)
-Symptoms: `ECONNREFUSED 172.17.0.1:18789` or `ENOTFOUND host.docker.internal`.
+Symptoms: `ECONNREFUSED ...:18789` or `ENOTFOUND host.docker.internal`.
 Checks:
-- `ss -ltnp | grep 18789`
-- Ensure OpenClaw gateway is running and bound appropriately.
-- Ensure compose includes host-gateway mapping (`extra_hosts: host.docker.internal:host-gateway`).
-
-### Frontend says backend unreachable
-Usually `NEXT_PUBLIC_API_URL` mismatch for VPS access.
-Set it to `http://<public-ip>:8000`, then rebuild frontend.
+- ensure OpenClaw gateway is listening on 18789
+- ensure compose host-gateway mapping is present
 
 ## 8) Current known tradeoffs
 
-1. Install scripts are opinionated and still large; functionality is prioritized over minimalism.
-2. Windows and Linux bootstrap are now closer, but Linux remains the most battle-tested path for VPS.
-3. Some legacy scripts/docs still exist; runtime-critical path should follow files listed above.
+1. Installer scripts remain large and opinionated.
+2. Linux path is most battle-tested for VPS.
+3. Some legacy docs/scripts still contain older references; use this file + upgrade doc as canonical bootstrap context.
 
 ---
-This is the canonical current understanding of the merged project and should be used as the starting context for the next tasks.
+This document is the current source-of-truth overview for architecture, installer behavior, and upgrade behavior.
