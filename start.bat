@@ -114,7 +114,7 @@ echo ===================================================
 echo.
 
 echo OK: Loading existing .env values...
-for /f "usebackq tokens=1,2 delims==" %%a in ("%~dp0.env") do (
+for /f "usebackq tokens=1,* delims==" %%a in ("%~dp0.env") do (
   if "%%a"=="OPENCLAW_TOKEN" set OPENCLAW_TOKEN=%%b
   if "%%a"=="CONVEX_URL" set CONVEX_URL=%%b
   if "%%a"=="CONVEX_DEPLOY_KEY" set CONVEX_DEPLOY_KEY=%%b
@@ -284,6 +284,11 @@ echo CONVEX_URL=!CONVEX_URL!>> "%~dp0.env"
 echo CONVEX_DEPLOY_KEY=!CONVEX_DEPLOY_KEY!>> "%~dp0.env"
 
 (
+  if "!PUBLIC_HOST!"=="" set "PUBLIC_HOST=localhost"
+  if /I "!PUBLIC_HOST!"=="undefined" set "PUBLIC_HOST=localhost"
+  if /I "!PUBLIC_HOST!"=="null" set "PUBLIC_HOST=localhost"
+  set "FRONTEND_ORIGIN=http://!PUBLIC_HOST!:3000"
+  set "API_BASE_URL=http://!PUBLIC_HOST!:8000"
   echo FRONTEND_PORT=3000
   echo BACKEND_PORT=8000
   echo CORS_ORIGINS=!FRONTEND_ORIGIN!,http://localhost:3000,http://127.0.0.1:3000

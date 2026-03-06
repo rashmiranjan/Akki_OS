@@ -247,6 +247,32 @@ upsert_env() {
     fi
 }
 
+sanitize_host() {
+    local raw="${1:-}"
+    local cleaned
+    cleaned="$(printf "%s" "$raw" | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+    if [ -z "$cleaned" ] || [ "$cleaned" = "undefined" ] || [ "$cleaned" = "null" ]; then
+        echo "localhost"
+    else
+        echo "$cleaned"
+    fi
+}
+
+read_env_fallback() {
+    local key="$1"
+    if [ -n "${!key:-}" ]; then
+        return 0
+    fi
+    if [ ! -f "$SCRIPT_DIR/.env" ]; then
+        return 0
+    fi
+    local value
+    value="$(grep -E "^${key}=" "$SCRIPT_DIR/.env" | tail -n1 | sed "s/^${key}=//" | tr -d '\r')"
+    if [ -n "$value" ]; then
+        printf -v "$key" "%s" "$value"
+    fi
+}
+
 sync_openclaw_token() {
     if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
         echo ""
@@ -391,6 +417,8 @@ fi
 echo "OK: Loading .env"
 source "$SCRIPT_DIR/.env"
 configure_npm_user_prefix
+read_env_fallback "CONVEX_URL"
+read_env_fallback "CONVEX_DEPLOY_KEY"
 
 run_managed_sync() {
     local action="$1"
@@ -441,10 +469,7 @@ echo "Syncing OpenClaw gateway token..."
 sync_openclaw_token
 apply_workspace_openclaw_template
 configure_openclaw_gateway_defaults
-PUBLIC_HOST="$(detect_public_host)"
-if [ -z "$PUBLIC_HOST" ] || [ "$PUBLIC_HOST" = "undefined" ] || [ "$PUBLIC_HOST" = "null" ]; then
-    PUBLIC_HOST="localhost"
-fi
+PUBLIC_HOST="$(sanitize_host "$(detect_public_host)")"
 FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
 API_BASE_URL="http://${PUBLIC_HOST}:8000"
 echo "OK: Host resolved as $PUBLIC_HOST"
@@ -556,6 +581,11 @@ if [ -z "$CONVEX_DEPLOY_KEY" ]; then
 fi
 upsert_env "CONVEX_URL" "$CONVEX_URL"
 upsert_env "CONVEX_DEPLOY_KEY" "$CONVEX_DEPLOY_KEY"
+
+# Re-resolve host immediately before writing Mission Control env to avoid blank values.
+PUBLIC_HOST="$(sanitize_host "${OPENCLAW_PUBLIC_HOST:-$PUBLIC_HOST}")"
+FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
+API_BASE_URL="http://${PUBLIC_HOST}:8000"
 
 # Mission Control .env — always refresh so token stays in sync with OpenClaw
 cat > "$OPERATIONS_DIR/.env" << EOF
