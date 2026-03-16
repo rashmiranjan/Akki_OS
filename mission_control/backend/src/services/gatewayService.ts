@@ -1,23 +1,15 @@
 ﻿import { WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
+import { PBOS_AGENT_IDS } from "../config/pbos";
 dotenv.config();
 
 const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || "";
 const GATEWAY_TOKEN = process.env.OPENCLAW_TOKEN || "";
 
-const AGENT_SESSION_MAP: Record<string, string> = {
-    main: "agent:main:main",
-    jarvis: "agent:jarvis:main",
-    loki: "agent:loki:main",
-    fury: "agent:fury:main",
-    echo: "agent:echo:main",
-    shuri: "agent:shuri:main",
-    oracle: "agent:oracle:main",
-    pulse: "agent:pulse:main",
-    atlas: "agent:atlas:main",
-    vision: "agent:vision:main",
-};
+const AGENT_SESSION_MAP: Record<string, string> = Object.fromEntries(
+    PBOS_AGENT_IDS.map((agentId) => [agentId, `agent:${agentId}:main`]),
+);
 
 const SESSION_AGENT_MAP: Record<string, string> = Object.fromEntries(
     Object.entries(AGENT_SESSION_MAP).map(([k, v]) => [v, k])

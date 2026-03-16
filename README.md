@@ -1,90 +1,58 @@
-# 🦅 Akki OS - Personal Branding Operating System
+# Akki OS
 
-> 24x7 autonomous AI system that manages your entire personal brand on LinkedIn & Twitter
+Akki OS is a repo-local Personal Branding OS built on top of OpenClaw. It packages a PB-OS domain model, a 7-agent cabinet, and Mission Control so a user can clone the repo, install once, and start from a coherent baseline.
 
-## ⚡ Quick Start
+## Install
 ```bash
 git clone https://github.com/rashmiranjan/Akki_OS
 cd Akki_OS
 bash install.sh
 ```
 
-## 🔄 Upgrade
+Upgrade an existing local install:
 ```bash
-# Linux/macOS
 bash install.sh --upgrade --non-interactive
-
-# Windows
-install.bat --upgrade --non-interactive
 ```
 
-Dry run:
-```bash
-bash install.sh --upgrade --dry-run
-```
+## Runtime Model
+- Repo root is the source of truth for Akki-owned assets.
+- OpenClaw keeps its own config/state in `~/.openclaw`.
+- PB-OS domains live in `./domains/pb-os`.
+- Packaged skills live in `./workspace/skills`.
+- Agents are provisioned from `./agents`.
 
-## 🤖 9 AI Agents
+Installer-managed runtime values are written to `.akki/runtime.env`.
 
-| Agent | Role | Skill |
-|-------|------|-------|
-| 🦅 Jarvis | Orchestrator | All skills |
-| 🔍 Fury | Researcher | apify-research |
-| ✍️ Loki | Writer | linkedin-writer, twitter-writer |
-| 📊 Shuri | Strategist | strategy-planner |
-| 🚀 Atlas | Distributor | linkedin-post, twitter-post |
-| 💬 Echo | Engagement | engagement-hunter |
-| 💡 Oracle | Idea Generator | idea-generator |
-| 📈 Pulse | Analytics | analytics-reader |
-| 🎨 Vision | Visual Generator | browser-automation |
+## PB-OS Agent Cabinet
+- Atlas: orchestration and project setup
+- Archivist: founder and product memory
+- Oracle: audience and market intelligence
+- Pulse: analytics and iteration
+- Scribe: narrative and draft production
+- Keith: distribution and network expansion
+- Sentinel: signal monitoring and resonance tracking
 
-## 🛠️ Skills
-
-| Skill | Purpose |
-|-------|---------|
-| apify-research | Market research (Reddit, LinkedIn, X) |
-| linkedin-writer | LinkedIn post writing |
-| twitter-writer | Twitter thread writing |
-| linkedin-post | Auto publish to LinkedIn |
-| twitter-post | Auto publish to Twitter |
-| idea-generator | Content ideas from research |
-| strategy-planner | 7-day content calendar |
-| engagement-hunter | Reply suggestions |
-| analytics-reader | Performance insights |
-| convex-save | Data storage |
-| webhook-server | Real-time notifications |
-| browser-automation | Browser control |
-| apify-scripts | Web scraping |
-| db-helpers | Database helpers |
-
-## 📋 Requirements
-
-- Node.js 18+
-- OpenClaw
-- Convex account (free)
-- Telegram Bot Token
-- Gemini API Key (free)
-- Apify account (free tier)
-
-## 🗄️ Database Setup
-
-Run `skills/convex-schema/schema.sql` in Convex SQL Editor
-
-## 🏗️ Architecture
-```
-Bootstrap Layer (Akki OS) -> OpenClaw Gateway + Agents + Webhook
-Operations Layer (Mission Control) -> API + Convex + Dashboard
-```
-
-## 📁 Structure
-```
-akki-os/
-├── platform/
-│   ├── bootstrap/     # Installer + provisioning layer
-│   └── operations/    # Operations layer docs (mission_control runtime)
+## Repo Layout
+```text
+Akki_OS/
+├── agents/            # PB-OS agent workspaces
+├── domains/           # Shared PB-OS domain assets
+├── workspace/         # Repo-local OpenClaw workspace + packaged skills
 ├── mission_control/   # Backend + frontend control plane
-├── agents/            # OpenClaw agent workspaces
-├── skills/            # Reusable skill packs + scripts
-├── workspace/         # Shared OpenClaw workspace
-├── install.sh         # Bootstrap entrypoint
-└── .env.example       # Root env defaults
+├── platform/          # Bootstrap and operations docs
+├── tools/             # Installer support scripts
+└── install.sh         # Canonical install/upgrade entrypoint
 ```
+
+## What The Installer Does
+- Ensures Node.js, Docker, and OpenClaw are available
+- Runs OpenClaw onboarding against the repo-local workspace
+- Registers the PB-OS agents
+- Validates packaged domains and skills
+- Writes Mission Control environment values
+- Deploys Convex if credentials are provided
+- Starts Mission Control via Docker Compose
+
+## Notes
+- This repo now targets the PB-OS model, not the older 9-agent Akki layout.
+- If a shared external skill is still required, treat it as an explicit dependency and package it before relying on it in automation.

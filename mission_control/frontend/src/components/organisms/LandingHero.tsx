@@ -22,8 +22,8 @@ export function LandingHero() {
             <span className="hero-highlight">on autopilot.</span>
           </h1>
           <p>
-            Akki OS runs 24/7 — researching trends, writing posts, engaging your audience,
-            and publishing content. You focus on building. Agents handle the rest.
+            Akki OS runs 24/7 as a personal branding operating system for founders. It researches
+            audience signals, sharpens positioning, drafts content, and keeps your distribution loop moving.
           </p>
 
           <div className="hero-actions">
@@ -64,10 +64,10 @@ export function LandingHero() {
 
           <div className="hero-features">
             {[
-              "Loki writes posts 24/7",
-              "Atlas publishes automatically",
-              "Fury researches trends",
-              "Jarvis coordinates everything",
+              "Atlas coordinates the system",
+              "Oracle maps audience intelligence",
+              "Scribe drafts content",
+              "Keith grows distribution loops",
             ].map((label) => (
               <div key={label} className="hero-feature">
                 <div className="feature-icon">✓</div>
@@ -87,14 +87,14 @@ export function LandingHero() {
           </div>
           <div className="surface-subtitle">
             <h3>Your agents are working right now.</h3>
-            <p>Research, writing, publishing — all autonomous.</p>
+            <p>Intelligence, strategy, drafting, and distribution are running in one loop.</p>
           </div>
           <div className="metrics-row">
-            {[
-              { label: "Posts Written", value: "24" },
-              { label: "Published", value: "18" },
-              { label: "Engagements", value: "340" },
-            ].map((item) => (
+              {[
+                { label: "Insights Logged", value: "24" },
+                { label: "Drafts Ready", value: "18" },
+                { label: "Signals Reviewed", value: "340" },
+              ].map((item) => (
               <div key={item.label} className="metric">
                 <div className="metric-value">{item.value}</div>
                 <div className="metric-label">{item.label}</div>
@@ -105,10 +105,10 @@ export function LandingHero() {
             <div className="content-section">
               <h4>Agents — Online</h4>
               {[
-                { name: "Jarvis", role: "Orchestrating tasks" },
-                { name: "Loki", role: "Writing 2 LinkedIn posts" },
-                { name: "Fury", role: "Researching AI trends" },
-                { name: "Atlas", role: "Publishing approved drafts" },
+                { name: "Atlas", role: "Coordinating project flow" },
+                { name: "Oracle", role: "Mining audience signals" },
+                { name: "Scribe", role: "Drafting content assets" },
+                { name: "Keith", role: "Mapping distribution opportunities" },
               ].map((agent) => (
                 <div key={agent.name} className="status-item">
                   <div className="status-icon progress">⊙</div>
@@ -138,9 +138,9 @@ export function LandingHero() {
             <div className="content-section">
               <h4>Recent Activity</h4>
               {[
-                { text: "Loki wrote post about AI agents", time: "2m" },
-                { text: "Atlas published to LinkedIn", time: "1h" },
-                { text: "Fury found 3 trending topics", time: "4h" },
+                { text: "Scribe drafted a new founder story post", time: "2m" },
+                { text: "Keith identified 5 collaboration targets", time: "1h" },
+                { text: "Oracle logged 3 new trend shifts", time: "4h" },
               ].map((signal) => (
                 <div key={signal.text} className="signal-item">
                   <div className="signal-text">{signal.text}</div>
@@ -156,20 +156,20 @@ export function LandingHero() {
         <div className="features-grid">
           {[
             {
-              title: "Loki — Content Writer",
-              description: "Writes LinkedIn and Twitter posts in your voice, 24/7. Bold, direct, targeted at Founders & Developers.",
+              title: "Atlas — Orchestrator",
+              description: "Runs the PB-OS workflow, creates project structure, and keeps every specialist aligned to the current stage.",
             },
             {
-              title: "Fury — Researcher",
-              description: "Scans trending topics in AI agents space every 4 hours. Feeds insights to Oracle and Loki.",
+              title: "Oracle — Audience Intelligence",
+              description: "Maps pains, buying triggers, objections, and rising conversations so strategy is grounded in reality.",
             },
             {
-              title: "Atlas — Publisher",
-              description: "Publishes approved drafts to LinkedIn and Twitter automatically. Likes, comments, connects on your behalf.",
+              title: "Scribe — Content Engine",
+              description: "Turns positioning into drafts, signature series, and content assets that feel coherent across formats.",
             },
             {
-              title: "Jarvis — Orchestrator",
-              description: "Coordinates all agents, reviews mission status every 6 hours, keeps everything aligned with your goals.",
+              title: "Pulse + Sentinel — Iteration Loop",
+              description: "Watch what is resonating, detect shifts in performance, and feed the next strategic adjustment back into the system.",
             },
           ].map((feature, idx) => (
             <div key={feature.title} className="feature-card">
@@ -185,8 +185,8 @@ export function LandingHero() {
         <div className="cta-content">
           <h2>Start building your brand on autopilot.</h2>
           <p>
-            Onboard once. Your agents learn your voice, research your niche,
-            and post consistently — every single day.
+            Onboard once. Your agents learn your positioning, study your audience,
+            and keep the system compounding without you babysitting every step.
           </p>
           <div className="cta-actions">
             <SignedOut>

@@ -3,31 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import {
     Activity,
-    Cpu,
-    Zap,
-    Search,
-    Lightbulb,
-    PenTool,
-    Share2,
-    MessageSquare,
-    BarChart3,
-    Calendar,
-    Image as ImageIcon,
     Play
 } from 'lucide-react';
 import { useAuth } from "@/auth/clerk";
+import { DEFAULT_AGENT_ICON, PBOS_AGENTS } from "@/lib/pbos-agents";
 
-const AGENTS = [
-    { id: 'jarvis', name: 'Jarvis', role: 'Orchestrator', icon: Cpu, color: 'text-blue-600' },
-    { id: 'fury', name: 'Fury', role: 'Autonomous Researcher', icon: Search, color: 'text-red-600' },
-    { id: 'shuri', name: 'Shuri', role: 'Content Strategist', icon: Calendar, color: 'text-orange-600' },
-    { id: 'oracle', name: 'Oracle', role: 'Ideation Brain', icon: Lightbulb, color: 'text-yellow-600' },
-    { id: 'loki', name: 'Loki', role: 'Chief Writer', icon: PenTool, color: 'text-emerald-600' },
-    { id: 'atlas', name: 'Atlas', role: 'Distributor', icon: Share2, color: 'text-indigo-600' },
-    { id: 'echo', name: 'Echo', role: 'Engagement Agent', icon: MessageSquare, color: 'text-pink-600' },
-    { id: 'pulse', name: 'Pulse', role: 'Performance Analytics', icon: BarChart3, color: 'text-violet-600' },
-    { id: 'vision', name: 'Vision', role: 'Visual Generator', icon: ImageIcon, color: 'text-teal-600' },
-];
+const AGENTS = PBOS_AGENTS;
 
 export const AgentStatusPanel = () => {
     const { getToken, isSignedIn } = useAuth();
@@ -104,7 +85,7 @@ export const AgentStatusPanel = () => {
                         <div key={i} className="h-20 bg-slate-50 rounded-xl animate-pulse" />
                     ))
                 ) : agents.map((agent) => {
-                    const localInfo = AGENTS.find(a => a.id === agent.id) || { icon: Cpu, color: 'text-slate-600' };
+                    const localInfo = AGENTS.find(a => a.id === agent.id) || { icon: DEFAULT_AGENT_ICON, color: 'text-slate-600' };
                     const Icon = localInfo.icon;
                     const status = agent.status || 'online';
 
@@ -148,4 +129,3 @@ export const AgentStatusPanel = () => {
         </div>
     );
 };
-

@@ -205,11 +205,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OPERATIONS_DIR="$SCRIPT_DIR/mission_control"
 OPENCLAW_WORKSPACE_ROOT="$SCRIPT_DIR/workspace"
 AGENTS_ROOT="$SCRIPT_DIR/agents"
+DOMAINS_ROOT="$SCRIPT_DIR/domains"
+SKILLS_ROOT="$OPENCLAW_WORKSPACE_ROOT/skills"
 OPENCLAW_CONFIG_PATH="${HOME}/.openclaw/openclaw.json"
 OPENCLAW_WORKSPACE_CONFIG_TEMPLATE="${OPENCLAW_WORKSPACE_ROOT}/openclaw.json"
 HOME_STATE_FILE="${HOME}/.akki/state/install-state.json"
 REPO_STATE_FILE="${SCRIPT_DIR}/.akki/state/install-state.json"
 OPERATIONS_ENV_FILE="${OPERATIONS_DIR}/.env"
+RUNTIME_ENV_FILE="${SCRIPT_DIR}/.akki/runtime.env"
+PBOS_AGENTS=(atlas archivist oracle pulse scribe keith sentinel)
 if [ -n "${OPENCLAW_GATEWAY_BIND:-}" ]; then
     DESIRED_GATEWAY_BIND="$OPENCLAW_GATEWAY_BIND"
 elif [ "$OS" = "linux" ]; then
@@ -296,6 +300,22 @@ merge_env_preserve_existing() {
         fi
         echo "${key}=${value}" >> "$env_file"
     done < "$defaults_file"
+}
+
+write_runtime_env() {
+    mkdir -p "$(dirname "$RUNTIME_ENV_FILE")"
+    cat > "$RUNTIME_ENV_FILE" <<EOF
+AKKI_REPO_ROOT=$SCRIPT_DIR
+AKKI_OPENCLAW_HOME=${HOME}/.openclaw
+AKKI_OPENCLAW_CONFIG_PATH=$OPENCLAW_CONFIG_PATH
+AKKI_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT
+AKKI_AGENTS_ROOT=$AGENTS_ROOT
+AKKI_DOMAINS_ROOT=$DOMAINS_ROOT
+AKKI_SKILLS_ROOT=$SKILLS_ROOT
+AKKI_OPERATIONS_ROOT=$OPERATIONS_DIR
+AKKI_AGENT_IDS=${PBOS_AGENTS[*]}
+EOF
+    echo "OK: Runtime contract written to $RUNTIME_ENV_FILE"
 }
 
 sync_openclaw_token() {
@@ -513,6 +533,7 @@ echo "Syncing OpenClaw gateway token..."
 sync_openclaw_token
 apply_workspace_openclaw_template
 configure_openclaw_gateway_defaults
+write_runtime_env
 PUBLIC_HOST="$(sanitize_host "$(detect_public_host)")"
 FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
 API_BASE_URL="http://${PUBLIC_HOST}:8000"
@@ -549,15 +570,15 @@ else
     echo "WARN: systemd not available; OpenClaw Gateway will not auto-restart. Start manually with: openclaw gateway --port 18789"
 fi
 
-# [4/5] Agents + Skills + Webhook + Mission Control
+# [4/5] Agents + Skills + Mission Control
 echo ""
-echo "[4/5] Setting up Agents + Skills + Webhook + Mission Control..."
+echo "[4/5] Setting up Agents + Skills + Mission Control..."
 
 # Register agents
 AGENT_CONFLICT_LOG="$SCRIPT_DIR/.akki-agent-conflicts.log"
 mkdir -p "$SCRIPT_DIR/.akki"
 : > "$AGENT_CONFLICT_LOG"
-for agent in jarvis fury loki shuri atlas echo oracle pulse vision; do
+for agent in "${PBOS_AGENTS[@]}"; do
     AGENT_OUTPUT="$(openclaw agents add "$agent" --workspace "$SCRIPT_DIR/agents/$agent" 2>&1)"
     AGENT_EXIT=$?
     if [ $AGENT_EXIT -eq 0 ]; then
@@ -570,23 +591,12 @@ for agent in jarvis fury loki shuri atlas echo oracle pulse vision; do
     fi
 done
 
-# Copy skills
-echo "OK: Skills sync managed by tools/managed_sync.js (local edits preserved)"
-
-# Start webhook — port check pehle
-if ! lsof -i :3003 &> /dev/null; then
-    cd "$SCRIPT_DIR/skills/webhook-server/scripts"
-    echo "CONVEX_URL=$CONVEX_URL" > .env
-    echo "OPENCLAW_TOKEN=$OPENCLAW_TOKEN" >> .env
-    npm init -y &> /dev/null
-    npm install convex dotenv &> /dev/null
-    nohup node server.js > "$SCRIPT_DIR/webhook.log" 2>&1 &
-    cd "$SCRIPT_DIR"
-    sleep 2
-    echo "OK: Webhook started on port 3003"
-else
-    echo "OK: Webhook already running on port 3003"
+echo "OK: Packaged skills are available at $SKILLS_ROOT"
+if [ ! -d "$DOMAINS_ROOT/pb-os" ]; then
+    echo "ERROR: Expected PB-OS domain at $DOMAINS_ROOT/pb-os"
+    exit 1
 fi
+echo "OK: PB-OS domain available at $DOMAINS_ROOT/pb-os"
 
 # Start host updater service (local-only, token-protected)
 if ! lsof -i :3010 &> /dev/null; then
@@ -644,6 +654,10 @@ OPENCLAW_TOKEN=$OPENCLAW_TOKEN
 OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789
 OPENCLAW_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT
 AGENTS_ROOT=$AGENTS_ROOT
+DOMAINS_ROOT=$DOMAINS_ROOT
+AKKI_REPO_ROOT=$SCRIPT_DIR
+AKKI_SKILLS_ROOT=$SKILLS_ROOT
+AKKI_RUNTIME_ENV=$RUNTIME_ENV_FILE
 NEXT_PUBLIC_API_URL=${API_BASE_URL}
 BETTER_AUTH_URL=${API_BASE_URL}
 CONVEX_URL=$CONVEX_URL
@@ -691,7 +705,7 @@ echo ""
 echo "   OpenClaw:        http://127.0.0.1:18789/?token=$OPENCLAW_TOKEN"
 echo "   Mission Control: $FRONTEND_ORIGIN  (Login: $OPENCLAW_TOKEN)"
 echo "   Convex DB:       $CONVEX_URL"
-echo "   Webhook:         http://localhost:3003"
+echo "   Domain Root:     $DOMAINS_ROOT/pb-os"
 echo ""
 echo "Next Step: Open Mission Control and chat with your agents!"
 echo ""

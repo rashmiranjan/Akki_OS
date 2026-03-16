@@ -10,7 +10,7 @@ Database URL: from user's CONVEX_URL env variable
 ## Usage
 All agents report via webhook:
 POST http://localhost:3003
-{"agent": "loki", "action": "draft", "message": "content here"}
+{"agent": "scribe", "action": "draft", "message": "content here"}
 
 ## Setup
 User creates free account at https://convex.dev

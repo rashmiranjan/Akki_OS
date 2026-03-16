@@ -48,7 +48,7 @@ Open `SOUL.md` together and talk about:
 ```
 curl -X POST http://127.0.0.1:3003 \
   -H "Content-Type: application/json" \
-  -d "{\"agent\": \"main\", \"action\": \"test\", \"message\": \"Akki OS is live!\"}"
+  -d "{\"agent\": \"atlas\", \"action\": \"test\", \"message\": \"Akki OS is live!\"}"
 ```
 
 ## Step 5: Launch

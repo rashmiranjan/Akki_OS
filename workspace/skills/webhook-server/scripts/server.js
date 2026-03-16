@@ -87,7 +87,7 @@ async function saveDirectToConvex(data, rawBody) {
       });
     } else {
       await convex.client.mutation(convex.api.activity.log, {
-        agent: data.agent || 'main',
+        agent: data.agent || 'atlas',
         action: data.action || 'message',
         message: data.message || rawBody,
         user_id: data.user_id || 'local-user',

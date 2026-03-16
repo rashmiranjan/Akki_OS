@@ -3,7 +3,7 @@ import { MemoryService } from '../services/memoryService';
 
 const memoryService = MemoryService.getInstance();
 
-/** GET /api/v1/memory?agent=jarvis&type=UserProfile */
+/** GET /api/v1/memory?agent=atlas&type=UserProfile */
 export const getMemory = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     const { agent, type } = req.query as { agent?: string; type?: string };

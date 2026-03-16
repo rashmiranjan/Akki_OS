@@ -20,5 +20,5 @@ convex via webhook_URL aur convex via webhook_SERVICE_KEY .env mein daalo
 
 ## Usage
 const db = require('./db-helpers');
-await db.logActivity('fury', 'research', 'Found pain points');
+await db.logActivity('oracle', 'research', 'Found pain points');
 await db.saveDraft({content, platform, user_id});

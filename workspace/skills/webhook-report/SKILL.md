@@ -17,12 +17,12 @@ curl -X POST http://127.0.0.1:3003 \
 # Fury research complete
 curl -X POST http://127.0.0.1:3003 \
   -H "Content-Type: application/json" \
-  -d '{"agent": "fury", "action": "research_complete", "message": "Found 5 pain points"}'
+  -d '{"agent": "oracle", "action": "research_complete", "message": "Found 5 pain points"}'
 
 # Loki draft created
 curl -X POST http://127.0.0.1:3003 \
   -H "Content-Type: application/json" \
-  -d '{"agent": "loki", "action": "draft_created", "message": "LinkedIn post ready"}'
+  -d '{"agent": "scribe", "action": "draft_created", "message": "LinkedIn post ready"}'
 
 ## MANDATORY
 Always run this after completing ANY task!

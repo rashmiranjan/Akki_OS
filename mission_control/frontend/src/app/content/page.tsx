@@ -74,10 +74,10 @@ export default function ContentLibraryPage() {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/agents/trigger`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ agentName: "loki", command: "generate_posts" })
+                body: JSON.stringify({ agentName: "scribe", command: "generate_posts" })
             });
             const data = await res.json();
-            setMessage(data.success ? "✅ Loki is writing new posts!" : "❌ Gateway error.");
+            setMessage(data.success ? "✅ Scribe is drafting new content!" : "❌ Gateway error.");
         } catch { setMessage("❌ Failed to connect."); }
         finally { setIsTriggering(false); setTimeout(() => setMessage(""), 4000); }
     };
@@ -207,11 +207,11 @@ export default function ContentLibraryPage() {
                         <div className="bg-indigo-600 rounded-[40px] p-12 text-center text-white relative overflow-hidden">
                             <div className="relative z-10 max-w-2xl mx-auto space-y-6">
                                 <h3 className="text-3xl font-black">Need more content?</h3>
-                                <p className="text-indigo-100 text-lg">Trigger Loki to write new posts based on your strategy.</p>
+                                <p className="text-indigo-100 text-lg">Trigger Scribe to write new posts based on your strategy.</p>
                                 <button onClick={handleTriggerSprint} disabled={isTriggering}
                                     className="px-8 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-all shadow-xl disabled:opacity-50">
                                     <Sparkles className="inline w-4 h-4 mr-2" />
-                                    {isTriggering ? "Triggering Loki..." : "Generate Posts with Loki"}
+                                    {isTriggering ? "Triggering Scribe..." : "Generate Posts with Scribe"}
                                 </button>
                                 {message && <p className="text-white font-bold text-sm">{message}</p>}
                             </div>

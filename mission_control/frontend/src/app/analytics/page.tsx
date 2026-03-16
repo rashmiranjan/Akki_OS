@@ -62,7 +62,7 @@ export default function AnalyticsPage() {
                                             <BarChart3 className="w-6 h-6 text-indigo-300" />
                                         </div>
                                         <p className="text-xs font-bold text-slate-400">Interactive Chart Mockup</p>
-                                        <p className="text-[10px] text-slate-300">Shuri is processing real-time data...</p>
+                                        <p className="text-[10px] text-slate-300">Pulse is processing real-time data...</p>
                                     </div>
                                 </div>
                             </div>
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
                                         <Sparkles className="w-3 h-3" /> AI Insight
                                     </div>
                                     <h3 className="text-2xl md:text-3xl font-black">Your Tuesday "Hot Take" posts are performing 4.2x better than average.</h3>
-                                    <p className="text-slate-400 text-lg">Should Fury scanned for more divergent topics for next week's Tuesday slot?</p>
+                                    <p className="text-slate-400 text-lg">Should Oracle scan for more divergent themes for next week's Tuesday slot?</p>
                                 </div>
                                 <button className="px-8 py-4 bg-white text-slate-900 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-slate-100 transition-all transition-all active:scale-95 whitespace-nowrap shadow-xl shadow-white/5">
                                     Approve Strategic Pivot

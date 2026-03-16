@@ -2,6 +2,7 @@
 import { MemoryService } from "../services/memoryService";
 import fs from "fs";
 import path from "path";
+import { PBOS_AGENT_IDS } from "../config/pbos";
 
 const memoryService = MemoryService.getInstance();
 
@@ -22,7 +23,7 @@ export const getOnboarding = async (req: Request, res: Response) => {
         const status = records[0]?.data ?? { completed: false };
 
         // Also return saved profile if exists
-        const profileRecords = await memoryService.getMemory(userId, "jarvis", "UserProfile");
+        const profileRecords = await memoryService.getMemory(userId, "atlas", "UserProfile");
         const profile = profileRecords[0]?.data ?? null;
 
         res.json({ success: true, onboarding: status, profile });
@@ -60,15 +61,15 @@ export const completeOnboarding = async (req: Request, res: Response) => {
         const userProfile = {
             name: context.name || "Akki User",
             nickname: context.name?.split(" ")[0] || "Akki",
-            what_they_build: context.niche || "",
-            who_they_help: context.audience || "Founders",
+            what_they_build: context.niche || context.do || "",
+            who_they_help: context.audience || context.customer || "Founders",
             stage: context.stage || "Building",
             goal: context.goal || "",
-            tone: context.tone || "",
+            tone: context.tone || context.communication || "",
             platforms: context.platforms || [],
             painPoints: context.painPoints || [],
             linkedin: context.linkedin || "",
-            timezone: context.timezone || "Asia/Calcutta",
+            timezone: context.timezone || "Asia/Kolkata",
             created_at: new Date().toISOString(),
             last_updated: new Date().toISOString(),
         };
@@ -77,9 +78,9 @@ export const completeOnboarding = async (req: Request, res: Response) => {
             const dir = path.dirname(USERPROFILE_PATH);
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
             fs.writeFileSync(USERPROFILE_PATH, JSON.stringify(userProfile, null, 2), "utf8");
-            console.log("âœ… OpenClaw UserProfile.json synced!");
+            console.log("OpenClaw UserProfile.json synced");
         } catch (fsErr: any) {
-            console.warn("âš ï¸ Could not write UserProfile.json:", fsErr.message);
+            console.warn("Could not write UserProfile.json:", fsErr.message);
         }
 
         // 2.5 Sync to all agents USER.md
@@ -115,8 +116,7 @@ ${(userProfile.painPoints || []).join("\\n- ")}
 ## LinkedIn
 ${userProfile.linkedin || "Not provided"}
 `;
-            const agents = ["jarvis", "main", "loki", "fury", "echo", "shuri", "oracle", "pulse", "atlas", "vision"];
-            for (const agent of agents) {
+            for (const agent of PBOS_AGENT_IDS) {
                 const agentDir = path.join(AGENTS_ROOT, agent);
                 if (fs.existsSync(agentDir)) {
                     fs.writeFileSync(path.join(agentDir, "USER.md"), userMdContent, "utf8");
@@ -132,10 +132,12 @@ ${userProfile.linkedin || "Not provided"}
             const { GatewayService: GS } = await import("../services/gatewayService.js");
             const gw = GS.getInstance();
             const agentBriefings = [
-                { id: "jarvis", msg: `Briefing: User is ${userProfile.name}. Niche: ${userProfile.what_they_build}. Goal: ${userProfile.goal}. Tone: ${userProfile.tone}. Audience: ${userProfile.who_they_help}. Save this to memory and coordinate with Oracle, Fury, Loki.` },
-                { id: "loki", msg: `Briefing: User is ${userProfile.name}. Tone: ${userProfile.tone}. Audience: ${userProfile.who_they_help}. Niche: ${userProfile.what_they_build}. Write all content in this voice.` },
-                { id: "fury", msg: `Briefing: User is ${userProfile.name}. Niche: ${userProfile.what_they_build}. Audience: ${userProfile.who_they_help}. Research trending topics for this audience.` },
-                { id: "oracle", msg: `Briefing: User is ${userProfile.name}. Niche: ${userProfile.what_they_build}. Goal: ${userProfile.goal}. Generate content ideas for this audience.` },
+                { id: "atlas", msg: `Briefing: Founder is ${userProfile.name}. Build: ${userProfile.what_they_build}. Goal: ${userProfile.goal}. Tone: ${userProfile.tone}. Audience: ${userProfile.who_they_help}. Use this to initialize PB-OS orchestration.` },
+                { id: "archivist", msg: `Briefing: Founder is ${userProfile.name}. Background capture is ready. Consolidate durable memory for build, audience, pain points, and goals.` },
+                { id: "oracle", msg: `Briefing: Founder is ${userProfile.name}. Build: ${userProfile.what_they_build}. Audience: ${userProfile.who_they_help}. Generate audience and opportunity intelligence from this context.` },
+                { id: "scribe", msg: `Briefing: Founder is ${userProfile.name}. Tone: ${userProfile.tone}. Audience: ${userProfile.who_they_help}. Write with this voice and positioning baseline.` },
+                { id: "keith", msg: `Briefing: Founder is ${userProfile.name}. Audience: ${userProfile.who_they_help}. Look for communities, collaborators, and distribution opportunities.` },
+                { id: "pulse", msg: `Briefing: Founder is ${userProfile.name}. Prepare to evaluate which content and positioning signals will matter most.` },
             ];
             for (const agent of agentBriefings) {
                 await gw.triggerAgent(agent.id, agent.msg);
@@ -145,16 +147,17 @@ ${userProfile.linkedin || "Not provided"}
             console.warn("⚠️ Could not brief agents:", agErr.message);
         }
 
-        // 3. Notify main agent via OpenClaw
+        // 4. Notify Atlas via OpenClaw
         try {
             const { GatewayService } = await import("../services/gatewayService.js");
             const gateway = GatewayService.getInstance();
-            await gateway.triggerAgent("main",
-                `User onboarding complete! Here is their profile: ${JSON.stringify(userProfile, null, 2)}. Please acknowledge and remember this context for all future interactions.`
+            await gateway.triggerAgent(
+                "atlas",
+                `Founder onboarding complete. Here is the profile: ${JSON.stringify(userProfile, null, 2)}. Acknowledge it and start the PB-OS project orchestration loop.`,
             );
-            console.log("âœ… Main agent notified of onboarding!");
+            console.log("Atlas notified of onboarding");
         } catch (gwErr: any) {
-            console.warn("âš ï¸ Could not notify agent:", gwErr.message);
+            console.warn("Could not notify agent:", gwErr.message);
         }
 
         res.json({ success: true });
@@ -162,7 +165,6 @@ ${userProfile.linkedin || "Not provided"}
         res.status(500).json({ success: false, error: error.message });
     }
 };
-
 
 
 

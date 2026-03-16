@@ -9,7 +9,7 @@ description: Mission Control ko real-time notifications bhejne ke liye local ser
 Mission Control ko real-time notifications bhejne ke liye local server
 
 ## Setup
-cd skills/webhook-server
+cd workspace/skills/webhook-server
 npm init -y
 npm install @convex via webhook/convex via webhook-js
 node server.js &

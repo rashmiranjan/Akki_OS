@@ -8,16 +8,16 @@
 
 ## Subtasks
 
-### 1. Writing (@loki)
+### 1. Writing (@scribe)
 - [ ] Draft LinkedIn post for Idea 012 (Vibe Coding)
 - [ ] Draft LinkedIn post for Idea 013 (YouTube SEO)
 - [ ] Draft Twitter thread for Idea 011 (Distribution)
 - **Output:** Save to `memory/drafts/2026-02-25/`
 
-### 2. Visuals (@vision)
+### 2. Distribution (@keith)
 - [ ] Create visual concepts for all 3 posts
 - **Output:** Save to `memory/drafts/2026-02-25/visuals.md`
 
-### 3. Review (@shuri)
+### 3. Review (@atlas)
 - [ ] Review drafts for tone and accuracy
 - [ ] Check visual alignment with brand

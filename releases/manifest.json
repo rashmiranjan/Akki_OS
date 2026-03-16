@@ -6,9 +6,13 @@
       "path": "agents",
       "checksum": "f279839ecc604a83ff21c4eb9068ae031bfa8e48d3ed7a4eaaa3883159230c12"
     },
+    "domains": {
+      "path": "domains",
+      "checksum": "pb-os-repo-local"
+    },
     "skills": {
-      "path": "skills",
-      "checksum": "eb7940927e5d640da8cd1e0617ba002fd3963696ed8e2d560f7b8fbbec0bd711"
+      "path": "workspace/skills",
+      "checksum": "repo-local-workspace-skills"
     },
     "mission_control": {
       "path": "mission_control",

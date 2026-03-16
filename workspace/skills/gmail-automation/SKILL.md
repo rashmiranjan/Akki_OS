@@ -1,23 +1,20 @@
 ---
 name: gmail-automation
-description: Gmail se emails read karna aur send karna
+description: Read and send Gmail messages using the currently configured runtime session.
 ---
 
 # Gmail Automation Skill
 
 ## Purpose
-Gmail se emails read karna aur send karna
+Read and send Gmail messages only after the runtime has been configured with valid Google credentials and a browser session.
 
-## Setup (One Time)
-node setup-google.js
-# Browser khulega - Google login karo
+## Setup
+Run the runtime's Gmail setup script and complete Google authentication.
 
 ## Usage
-# Emails read karo
-node gmail-actions.js read
-
-# Email send karo
-node gmail-actions.js send "to@email.com" "Subject" "Body"
+- Read messages
+- Send a message
+- Reuse the saved session for later Gmail actions
 
 ## Session
-Saved in: ~/.openclaw/mission-control/browser-sessions/google
+Use the browser-session location configured by the current runtime instead of assuming a machine-specific path.

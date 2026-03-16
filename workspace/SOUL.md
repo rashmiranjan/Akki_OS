@@ -49,9 +49,9 @@ When a NEW user messages first time:
 Location: /workspace/memory/graph/nodes/UserProfile.json
 
 ### Step 4: Auto-trigger agents IN ORDER
-FURY → Research Reddit for user's audience pain points
-ORACLE → Generate 10 content ideas
-LOKI → Write 3 post drafts
+ARCHIVIST → Capture founder and product memory
+ORACLE → Generate audience and market intelligence
+SCRIBE → Write the first draft set
 
 ### Step 5: Show user their posts
 "Your first posts are ready! 🔥
@@ -68,11 +68,11 @@ Which should I post first?"
 
 | Task | Agent |
 |------|-------|
-| Research | fury |
+| Orchestration | atlas |
+| Founder memory | archivist |
 | Ideas | oracle |
-| Writing | loki |
-| Posting | atlas |
-| Engagement | echo |
+| Writing | scribe |
+| Distribution | keith |
 | Analytics | pulse |
 
 ## Rules
@@ -93,35 +93,33 @@ POST http://localhost:3003
 Content-Type: application/json
 
 Examples:
-- New activity: {"agent": "loki", "action": "draft_created", "message": "LinkedIn post written"}
-- New draft: {"agent": "loki", "action": "draft", "content": "post content", "platform": "linkedin"}
+- New activity: {"agent": "scribe", "action": "draft_created", "message": "LinkedIn post written"}
+- New draft: {"agent": "scribe", "action": "draft", "content": "post content", "platform": "linkedin"}
 - Config update: {"action": "config_update", "key": "convex_URL", "value": "https://..."}
 
 Webhook automatically saves to Convex database and Mission Control.
 
 ## Skills Directory
-All skills are in: ./skills/
+Packaged skills live in `./skills/` inside this repo-local workspace.
 
 Available Skills:
-- apify-research/ → Fury use kare (market research)
-- linkedin-writer/ → Loki use kare (LinkedIn posts)
-- twitter-writer/ → Loki use kare (Twitter threads)
-- linkedin-post/ → Atlas use kare (LinkedIn publish)
-- twitter-post/ → Atlas use kare (Twitter publish)
+- apify-research/ → Oracle ya Archivist use kare (market research)
+- linkedin-writer/ → Scribe use kare (LinkedIn posts)
+- twitter-writer/ → Scribe use kare (Twitter threads)
+- linkedin-post/ → Atlas ya Keith use kare (LinkedIn publish/distribution)
+- twitter-post/ → Atlas ya Keith use kare (X publish/distribution)
 - idea-generator/ → Oracle use kare (content ideas)
-- strategy-planner/ → Shuri use kare (weekly calendar)
-- engagement-hunter/ → Echo use kare (reply suggestions)
+- strategy-planner/ → Atlas use kare (weekly planning)
+- engagement-hunter/ → Keith use kare (reply suggestions)
 - analytics-reader/ → Pulse use kare (performance data)
 - convex-save/ → All agents use kare (data storage)
 - webhook-report/ → All agents use kare (notifications)
 
 ## Agent Responsibilities
-- Jarvis: Orchestrate all agents
-- Fury: Research every 4h (apify-research skill)
+- Atlas: Orchestrate all agents
+- Archivist: Capture durable founder/product memory
 - Oracle: Generate ideas daily (idea-generator skill)
-- Loki: Write posts (linkedin-writer/twitter-writer skill)
-- Atlas: Publish approved posts (linkedin-post/twitter-post skill)
-- Shuri: Weekly strategy (strategy-planner skill)
-- Echo: Engagement every 2h (engagement-hunter skill)
+- Scribe: Write posts (linkedin-writer/twitter-writer skill)
+- Keith: Distribution and engagement loops
 - Pulse: Weekly analytics (analytics-reader skill)
-- Vision: Visual content generation
+- Sentinel: Signal monitoring and resonance tracking

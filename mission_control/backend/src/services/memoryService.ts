@@ -28,26 +28,36 @@ export class MemoryService {
     public async saveOnboardingMemory(userId: string, context: any): Promise<void> {
         const tasks: Promise<any>[] = [];
 
-        if (context?.niche || context?.goal || context?.tone) {
-            tasks.push(this.upsertMemory(userId, 'jarvis', 'UserProfile', {
-                niche: context.niche,
-                goal: context.goal,
+        const primarySummary = {
+            name: context.name,
+            niche: context.niche || context.do,
+            goal: context.goal,
+            tone: context.tone || context.communication,
+            audience: context.audience || context.customer,
+            stage: context.stage,
+            background: context.background,
+            platforms: context.platforms,
+        };
+
+        if (primarySummary.niche || primarySummary.goal || primarySummary.tone) {
+            tasks.push(this.upsertMemory(userId, 'atlas', 'UserProfile', {
+                ...primarySummary,
+                savedAt: new Date().toISOString(),
+            }));
+        }
+
+        if (context?.painPoints?.length || context?.customer) {
+            tasks.push(this.upsertMemory(userId, 'archivist', 'PainPoint', {
+                points: context.painPoints || [context.customer],
+                savedAt: new Date().toISOString(),
+            }));
+        }
+
+        if (context?.voiceProfile || context?.communication || context?.tone) {
+            tasks.push(this.upsertMemory(userId, 'scribe', 'VoiceProfile', {
+                ...(context.voiceProfile || {}),
+                communication: context.communication,
                 tone: context.tone,
-                platforms: context.platforms,
-                savedAt: new Date().toISOString(),
-            }));
-        }
-
-        if (context?.painPoints?.length) {
-            tasks.push(this.upsertMemory(userId, 'jarvis', 'PainPoint', {
-                points: context.painPoints,
-                savedAt: new Date().toISOString(),
-            }));
-        }
-
-        if (context?.voiceProfile) {
-            tasks.push(this.upsertMemory(userId, 'loki', 'VoiceProfile', {
-                ...context.voiceProfile,
                 savedAt: new Date().toISOString(),
             }));
         }

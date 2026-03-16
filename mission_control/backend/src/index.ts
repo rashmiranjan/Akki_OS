@@ -75,7 +75,7 @@ app.post('/api/v1/strategy', async (req: any, res: any) => {
     const userId = req.user?.id || 'local-user';
     const { week, goal, frequency, persona, days, generatedBy } = req.body;
     try {
-        const id = await convex.mutation(convexApi.strategy.save, { userId, week, goal, frequency, persona, days, generatedBy: generatedBy || 'shuri' });
+        const id = await convex.mutation(convexApi.strategy.save, { userId, week, goal, frequency, persona, days, generatedBy: generatedBy || 'atlas' });
         res.json({ success: true, id });
     } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
 });
@@ -94,4 +94,3 @@ app.listen(PORT, () => {
     console.log(`ðŸš€ Mission Control running on port ${PORT}`);
     initCronJobs();
 });
-

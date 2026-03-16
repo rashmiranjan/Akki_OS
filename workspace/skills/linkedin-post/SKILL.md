@@ -1,35 +1,25 @@
 ---
 name: linkedin-post
-description: Approved drafts ko LinkedIn pe automatically publish karna
+description: Publish approved drafts to LinkedIn using the active runtime's browser automation setup.
 ---
 
 # LinkedIn Post Skill
 
 ## Purpose
-Approved drafts ko LinkedIn pe automatically publish karna
+Publish approved drafts to LinkedIn once the founder has explicitly approved them.
 
-## Browser Session
-Location: ~/.openclaw/mission-control/browser-sessions/linkedin
-
-## How to Post
-Use browser automation to post on LinkedIn:
-node ~/.openclaw/mission-control/browser-automation/linkedin-actions.js
+## Runtime Notes
+- Do not assume a machine-specific browser session path.
+- Use the browser automation entrypoint configured for the current runtime.
+- If the runtime has not been configured for LinkedIn publishing yet, stop and report the setup gap.
 
 ## Steps
-1. Browser session load karo
-2. LinkedIn open karo
-3. Post content paste karo
-4. Publish karo
-5. Post URL save karo
+1. Load the configured LinkedIn browser session.
+2. Open the LinkedIn composer.
+3. Paste the approved content.
+4. Publish the post.
+5. Save the post URL or publish result in the active PB-OS project/activity log.
 
 ## After Publishing
-1. Update draft status in convex via webhook:
-curl -X PATCH http://localhost:3003
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1aWpvcGR4enB3cWxoZXl4cWRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTY1NDYyMiwiZXhwIjoyMDg3MjMwNjIyfQ.-Zws-y7D3n7pVtrkg-UVtJxJ-Ar7M0quIgfhzEQZPms" \
-  -H "Content-Type: application/json" \
-  -d '{"status": "published"}'
-
-2. Report to webhook:
-curl -X POST http://127.0.0.1:3003 \
-  -H "Content-Type: application/json" \
-  -d '{"agent": "atlas", "action": "post_published", "message": "Published on LinkedIn"}'
+1. Update the corresponding draft status through Mission Control or the configured draft persistence flow.
+2. Record the outcome for Atlas and Pulse.

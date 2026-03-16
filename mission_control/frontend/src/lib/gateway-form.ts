@@ -1,6 +1,6 @@
 import { gatewaysStatusApiV1GatewaysStatusGet } from "@/api/generated/gateways/gateways";
 
-export const DEFAULT_WORKSPACE_ROOT = "~/.openclaw";
+export const DEFAULT_WORKSPACE_ROOT = "./workspace";
 
 export type GatewayCheckStatus = "idle" | "checking" | "success" | "error";
 
