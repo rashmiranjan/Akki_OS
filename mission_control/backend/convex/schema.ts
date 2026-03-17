@@ -2,6 +2,23 @@
 import { v } from "convex/values";
 
 export default defineSchema({
+    project_documents: defineTable({
+        slug: v.string(),
+        relativePath: v.string(),
+        category: v.string(),
+        extension: v.string(),
+        title: v.optional(v.string()),
+        content: v.string(),
+        contentHash: v.string(),
+        sourceMtime: v.number(),
+        lastSyncedAt: v.number(),
+        parseStatus: v.string(),
+        structuredData: v.optional(v.any()),
+    })
+        .index("by_slug", ["slug"])
+        .index("by_slug_category", ["slug", "category"])
+        .index("by_slug_path", ["slug", "relativePath"]),
+
     memory: defineTable({
         userId: v.string(),
         agent: v.string(),

@@ -1,17 +1,15 @@
 ---
 name: webhook-server
-description: Mission Control ko real-time notifications bhejne ke liye local server
+description: Mission Control aur Convex ke beech compatibility bridge server
 ---
 
 # Webhook Server Skill
 
 ## Purpose
-Mission Control ko real-time notifications bhejne ke liye local server
+Older skills aur agents ke webhook payloads ko Mission Control ke canonical Convex-backed ingest path par forward karna.
 
 ## Setup
 cd skills/webhook-server
-npm init -y
-npm install @convex via webhook/convex via webhook-js
 node server.js &
 
 ## Port
@@ -20,7 +18,7 @@ node server.js &
 ## Usage
 curl -X POST http://127.0.0.1:3003 \
   -H "Content-Type: application/json" \
-  -d '{"agent": "fury", "action": "research_complete", "message": "summary"}'
+  -d '{"agent": "oracle", "action": "research_complete", "message": "summary"}'
 
 ## Auto-start
 Add to install.sh - starts automatically on setup

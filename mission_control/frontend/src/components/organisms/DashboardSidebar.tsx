@@ -11,7 +11,7 @@ import {
   Zap,
   Star,
   FileText,
-  Settings,
+  FolderKanban,
   ShieldAlert,
 } from "lucide-react";
 
@@ -38,6 +38,7 @@ const NAV_ITEMS = [
   {
     label: "Strategy",
     items: [
+      { href: "/projects", label: "Project Mirror", icon: FolderKanban },
       { href: "/strategy", label: "Content Roadmap", icon: Zap },
       { href: "/analytics", label: "Engagement", icon: BarChart3 },
     ],

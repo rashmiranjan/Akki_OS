@@ -25,7 +25,7 @@ Mission Control ke canonical Convex path ke through PB-OS memory, drafts, activi
 
 ## Usage
 const db = require('./db-helpers');
-await db.logActivity('oracle', 'research', 'Found pain points');
+await db.logActivity('oracle', 'research_complete', 'Found 5 positioning gaps');
 await db.saveDraft({ agent: 'scribe', content, platform: 'linkedin' });
 await db.saveMemory({ agent: 'atlas', type: 'UserProfile', data: profile });
 await db.getProjectDocuments('my-project', 'operations');

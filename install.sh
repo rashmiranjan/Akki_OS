@@ -598,6 +598,32 @@ if [ ! -d "$DOMAINS_ROOT/pb-os" ]; then
 fi
 echo "OK: PB-OS domain available at $DOMAINS_ROOT/pb-os"
 
+WEBHOOK_SCRIPT_DIR=""
+if [ -d "$SCRIPT_DIR/skills/webhook-server/scripts" ]; then
+    WEBHOOK_SCRIPT_DIR="$SCRIPT_DIR/skills/webhook-server/scripts"
+elif [ -d "$SCRIPT_DIR/workspace/skills/webhook-server/scripts" ]; then
+    WEBHOOK_SCRIPT_DIR="$SCRIPT_DIR/workspace/skills/webhook-server/scripts"
+fi
+
+if [ -n "$WEBHOOK_SCRIPT_DIR" ]; then
+    if ! lsof -i :3003 &> /dev/null; then
+        cd "$WEBHOOK_SCRIPT_DIR"
+        nohup env \
+            CONVEX_URL="$CONVEX_URL" \
+            OPENCLAW_TOKEN="$OPENCLAW_TOKEN" \
+            LOCAL_AUTH_TOKEN="$OPENCLAW_TOKEN" \
+            MISSION_CONTROL_API_URL="${MISSION_CONTROL_API_URL:-http://localhost:8000}" \
+            node server.js > "$SCRIPT_DIR/webhook.log" 2>&1 &
+        cd "$SCRIPT_DIR"
+        sleep 1
+        echo "OK: Webhook bridge started on port 3003"
+    else
+        echo "OK: Webhook bridge already running on port 3003"
+    fi
+else
+    echo "WARN: No packaged webhook bridge found under skills/ or workspace/skills"
+fi
+
 # Start host updater service (local-only, token-protected)
 if ! lsof -i :3010 &> /dev/null; then
     mkdir -p "$HOME/.akki/state"
@@ -705,6 +731,7 @@ echo ""
 echo "   OpenClaw:        http://127.0.0.1:18789/?token=$OPENCLAW_TOKEN"
 echo "   Mission Control: $FRONTEND_ORIGIN  (Login: $OPENCLAW_TOKEN)"
 echo "   Convex DB:       $CONVEX_URL"
+echo "   Webhook Bridge:  http://127.0.0.1:3003"
 echo "   Domain Root:     $DOMAINS_ROOT/pb-os"
 echo ""
 echo "Next Step: Open Mission Control and chat with your agents!"

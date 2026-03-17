@@ -1,21 +1,24 @@
 ---
-name: convex via webhook-save
-description: Data ko convex via webhook database mein save karo
+name: supabase-save
+description: Legacy archive only. Not part of the active Akki PB-OS runtime.
 ---
 
-# convex via webhook Save Skill
+# Supabase Save Skill
+
+Legacy archive only.
 
 ## Purpose
-Data ko convex via webhook database mein save karo
+This folder is preserved as reference from an older Supabase/PostgREST flow. The active runtime now uses Mission Control + Convex instead.
 
 ## Usage
-curl -X POST http://localhost:3003
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1aWpvcGR4enB3cWxoZXl4cWRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTY1NDYyMiwiZXhwIjoyMDg3MjMwNjIyfQ.-Zws-y7D3n7pVtrkg-UVtJxJ-Ar7M0quIgfhzEQZPms" \
-  -H "Content-Type: application/json" \
-  -d '{"column": "value"}'
+Do not use this for VPS testing.
 
-## Tables Available
-- activity (agent, action, message, user_id)
-- drafts (content, platform, status, user_id)
-- pain_points (text, source, user_id)
-- ideas (title, angle, user_id)
+Use one of these instead:
+- `workspace/skills/convex-save`
+- `workspace/skills/db-helpers`
+- `workspace/skills/webhook-server`
+
+## Status
+- legacy
+- not wired into the canonical Mission Control Convex path
+- retained only for historical reference

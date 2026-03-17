@@ -1,17 +1,21 @@
-# Convex Schema
+# Supabase Schema
 
-Database URL: from user's CONVEX_URL env variable
+Legacy archive only.
 
-## Tables
-- activity: agent, action, message, user_id, timestamp
-- config: key, value
-- drafts: agent, content, platform, status, timestamp
+## Purpose
+This SQL file documents an older Supabase/Postgres storage model. It is not the active runtime contract for Akki PB-OS.
 
-## Usage
-All agents report via webhook:
-POST http://localhost:3003
-{"agent": "scribe", "action": "draft", "message": "content here"}
+## Current Canonical Schema
+Use the Mission Control Convex schema instead:
 
-## Setup
-User creates free account at https://convex.dev
-Agent collects CONVEX_URL during onboarding
+- `mission_control/backend/convex/schema.ts`
+- `mission_control/backend/convex/activity.ts`
+- `mission_control/backend/convex/drafts.ts`
+- `mission_control/backend/convex/memory.ts`
+- `mission_control/backend/convex/projectDocuments.ts`
+- `mission_control/backend/convex/strategy.ts`
+
+## Status
+- legacy reference only
+- not used by the installer
+- not used by the current Mission Control backend
