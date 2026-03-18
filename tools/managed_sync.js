@@ -182,6 +182,8 @@ function runCheck(opts) {
   const agentsRoot = path.join(opts.repoRoot, "agents");
   const domainsRoot = path.join(opts.repoRoot, "domains");
   const packagedSkillsRoot = path.join(opts.repoRoot, "workspace", "skills");
+  const openclawHome = path.dirname(opts.openclawConfig);
+  const selfContainedRoot = path.join(openclawHome, "akki");
 
   const managedAgents = listSubdirs(agentsRoot);
   const managedDomains = listSubdirs(domainsRoot);
@@ -211,6 +213,14 @@ function runCheck(opts) {
       agentsRoot,
       domainsRoot,
       skillsRoot: packagedSkillsRoot,
+    },
+    selfContainedRuntime: {
+      root: selfContainedRoot,
+      workspaceRoot: path.join(selfContainedRoot, "workspace"),
+      agentsRoot: path.join(selfContainedRoot, "agents"),
+      domainsRoot: path.join(selfContainedRoot, "domains"),
+      skillsRoot: path.join(selfContainedRoot, "workspace", "skills"),
+      globalSkillsRoot: path.join(openclawHome, "skills"),
     },
   };
 }

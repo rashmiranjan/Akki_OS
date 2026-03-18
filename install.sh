@@ -21,6 +21,7 @@ NON_INTERACTIVE=false
 DRY_RUN=false
 FROM_VERSION=""
 CUSTOM_BACKUP_DIR=""
+RESYNC_RUNTIME=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -46,6 +47,9 @@ while [ $# -gt 0 ]; do
             shift
             CUSTOM_BACKUP_DIR="${1:-}"
             ;;
+        --resync-runtime)
+            RESYNC_RUNTIME=true
+            ;;
         *)
             echo "WARN: Unknown option '$1' (ignored)"
             ;;
@@ -58,7 +62,7 @@ if [ "$INSTALL_MODE" != "install" ] && [ "$INSTALL_MODE" != "upgrade" ]; then
     exit 1
 fi
 
-echo "Mode: $INSTALL_MODE (dry-run=$DRY_RUN, non-interactive=$NON_INTERACTIVE)"
+echo "Mode: $INSTALL_MODE (dry-run=$DRY_RUN, non-interactive=$NON_INTERACTIVE, resync-runtime=$RESYNC_RUNTIME)"
 
 # [1/5] Node.js check + auto-install (Node 22+ required by OpenClaw)
 echo "[1/5] Checking Node.js..."
@@ -203,12 +207,18 @@ echo "OK: OpenClaw installed"
 # Setup
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OPERATIONS_DIR="$SCRIPT_DIR/mission_control"
-OPENCLAW_WORKSPACE_ROOT="$SCRIPT_DIR/workspace"
-AGENTS_ROOT="$SCRIPT_DIR/agents"
-DOMAINS_ROOT="$SCRIPT_DIR/domains"
+BOOTSTRAP_WORKSPACE_ROOT="$SCRIPT_DIR/workspace"
+BOOTSTRAP_AGENTS_ROOT="$SCRIPT_DIR/agents"
+BOOTSTRAP_DOMAINS_ROOT="$SCRIPT_DIR/domains"
+PACKAGED_SKILLS_ROOT="$BOOTSTRAP_WORKSPACE_ROOT/skills"
+OPENCLAW_RUNTIME_ROOT="${HOME}/.openclaw/akki"
+OPENCLAW_WORKSPACE_ROOT="$OPENCLAW_RUNTIME_ROOT/workspace"
+AGENTS_ROOT="$OPENCLAW_RUNTIME_ROOT/agents"
+DOMAINS_ROOT="$OPENCLAW_RUNTIME_ROOT/domains"
 SKILLS_ROOT="$OPENCLAW_WORKSPACE_ROOT/skills"
+OPENCLAW_GLOBAL_SKILLS_ROOT="${HOME}/.openclaw/skills"
 OPENCLAW_CONFIG_PATH="${HOME}/.openclaw/openclaw.json"
-OPENCLAW_WORKSPACE_CONFIG_TEMPLATE="${OPENCLAW_WORKSPACE_ROOT}/openclaw.json"
+OPENCLAW_WORKSPACE_CONFIG_TEMPLATE="${BOOTSTRAP_WORKSPACE_ROOT}/openclaw.json"
 HOME_STATE_FILE="${HOME}/.akki/state/install-state.json"
 REPO_STATE_FILE="${SCRIPT_DIR}/.akki/state/install-state.json"
 OPERATIONS_ENV_FILE="${OPERATIONS_DIR}/.env"
@@ -308,10 +318,16 @@ write_runtime_env() {
 AKKI_REPO_ROOT=$SCRIPT_DIR
 AKKI_OPENCLAW_HOME=${HOME}/.openclaw
 AKKI_OPENCLAW_CONFIG_PATH=$OPENCLAW_CONFIG_PATH
+AKKI_OPENCLAW_RUNTIME_ROOT=$OPENCLAW_RUNTIME_ROOT
 AKKI_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT
 AKKI_AGENTS_ROOT=$AGENTS_ROOT
 AKKI_DOMAINS_ROOT=$DOMAINS_ROOT
 AKKI_SKILLS_ROOT=$SKILLS_ROOT
+AKKI_GLOBAL_SKILLS_ROOT=$OPENCLAW_GLOBAL_SKILLS_ROOT
+AKKI_BOOTSTRAP_WORKSPACE_ROOT=$BOOTSTRAP_WORKSPACE_ROOT
+AKKI_BOOTSTRAP_AGENTS_ROOT=$BOOTSTRAP_AGENTS_ROOT
+AKKI_BOOTSTRAP_DOMAINS_ROOT=$BOOTSTRAP_DOMAINS_ROOT
+AKKI_PACKAGED_SKILLS_ROOT=$PACKAGED_SKILLS_ROOT
 AKKI_OPERATIONS_ROOT=$OPERATIONS_DIR
 AKKI_AGENT_IDS=${PBOS_AGENTS[*]}
 EOF
@@ -401,6 +417,300 @@ try {
   process.stderr.write(`WARN: Could not apply workspace OpenClaw template: ${err.message}\n`);
 }
 NODE
+}
+
+runtime_copy_mode() {
+    if [ "$INSTALL_MODE" = "install" ] || [ "$RESYNC_RUNTIME" = true ]; then
+        echo "overwrite"
+    else
+        echo "missing"
+    fi
+}
+
+seed_runtime_tree() {
+    local src="$1"
+    local dst="$2"
+    local mode="$3"
+    local label="$4"
+
+    if [ ! -d "$src" ]; then
+        echo "ERROR: Missing bootstrap source for $label at $src"
+        exit 1
+    fi
+
+    mkdir -p "$dst"
+
+    node - "$src" "$dst" "$mode" "$label" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const [srcRoot, dstRoot, mode, label] = process.argv.slice(2);
+const skipNames = new Set([".DS_Store", "Thumbs.db"]);
+const skipDirs = new Set([".git", "node_modules", ".openclaw"]);
+let created = 0;
+let overwritten = 0;
+let preserved = 0;
+
+function shouldSkip(name, isDir) {
+  if (skipNames.has(name)) return true;
+  if (isDir && skipDirs.has(name)) return true;
+  return false;
+}
+
+function copyRecursive(srcDir, dstDir) {
+  fs.mkdirSync(dstDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (shouldSkip(entry.name, entry.isDirectory())) continue;
+    const from = path.join(srcDir, entry.name);
+    const to = path.join(dstDir, entry.name);
+    if (entry.isDirectory()) {
+      copyRecursive(from, to);
+      continue;
+    }
+    if (!entry.isFile()) continue;
+    if (!fs.existsSync(to)) {
+      fs.mkdirSync(path.dirname(to), { recursive: true });
+      fs.copyFileSync(from, to);
+      created += 1;
+    } else if (mode === "overwrite") {
+      fs.copyFileSync(from, to);
+      overwritten += 1;
+    } else {
+      preserved += 1;
+    }
+  }
+}
+
+copyRecursive(srcRoot, dstRoot);
+process.stdout.write(
+  `OK: Seeded ${label} -> ${dstRoot} (${created} new, ${overwritten} overwritten, ${preserved} preserved)\n`
+);
+NODE
+}
+
+seed_agent_runtime_definition() {
+    local agent="$1"
+    local mode="$2"
+    local src_root="$BOOTSTRAP_AGENTS_ROOT/$agent"
+    local dst_root="${HOME}/.openclaw/agents/$agent/agent"
+
+    mkdir -p "$dst_root"
+
+    node - "$src_root" "$dst_root" "$mode" "$agent" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const [srcRoot, dstRoot, mode, agent] = process.argv.slice(2);
+const durableFiles = [
+  "SOUL.md",
+  "IDENTITY.md",
+  "TOOLS.md",
+  "HEARTBEAT.md",
+  "AGENTS.md",
+  "USER.md",
+  "BOOTSTRAP.md",
+  "MEMORY.md",
+];
+let created = 0;
+let overwritten = 0;
+let preserved = 0;
+
+function copyFileIfNeeded(src, dst) {
+  if (!fs.existsSync(src)) return;
+  if (!fs.existsSync(dst)) {
+    fs.mkdirSync(path.dirname(dst), { recursive: true });
+    fs.copyFileSync(src, dst);
+    created += 1;
+    return;
+  }
+  if (mode === "overwrite") {
+    fs.copyFileSync(src, dst);
+    overwritten += 1;
+  } else {
+    preserved += 1;
+  }
+}
+
+for (const file of durableFiles) {
+  copyFileIfNeeded(path.join(srcRoot, file), path.join(dstRoot, file));
+}
+
+const skillsSrc = path.join(srcRoot, "skills");
+if (fs.existsSync(skillsSrc) && fs.statSync(skillsSrc).isDirectory()) {
+  const stack = [skillsSrc];
+  while (stack.length) {
+    const current = stack.pop();
+    const relBase = path.relative(skillsSrc, current);
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === ".DS_Store" || entry.name === ".git" || entry.name === "node_modules") continue;
+      const from = path.join(current, entry.name);
+      const to = path.join(dstRoot, "skills", relBase, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(from);
+      } else if (entry.isFile()) {
+        copyFileIfNeeded(from, to);
+      }
+    }
+  }
+}
+
+const userFile = path.join(dstRoot, "USER.md");
+if (!fs.existsSync(userFile)) {
+  fs.writeFileSync(
+    userFile,
+    `# USER.md - About Your Human\n\nFounder profile not synced yet. Await onboarding.\n`,
+    "utf8"
+  );
+  created += 1;
+}
+
+process.stdout.write(
+  `OK: Seeded OpenClaw agent definition for ${agent} (${created} new, ${overwritten} overwritten, ${preserved} preserved)\n`
+);
+NODE
+}
+
+provision_self_contained_runtime() {
+    local mode="$1"
+    mkdir -p "$OPENCLAW_RUNTIME_ROOT" "$OPENCLAW_WORKSPACE_ROOT" "$AGENTS_ROOT" "$DOMAINS_ROOT" "$SKILLS_ROOT" "$OPENCLAW_GLOBAL_SKILLS_ROOT"
+
+    seed_runtime_tree "$BOOTSTRAP_WORKSPACE_ROOT" "$OPENCLAW_WORKSPACE_ROOT" "$mode" "shared workspace"
+    seed_runtime_tree "$BOOTSTRAP_DOMAINS_ROOT" "$DOMAINS_ROOT" "$mode" "domains"
+    seed_runtime_tree "$PACKAGED_SKILLS_ROOT" "$SKILLS_ROOT" "$mode" "workspace skills"
+    seed_runtime_tree "$PACKAGED_SKILLS_ROOT" "$OPENCLAW_GLOBAL_SKILLS_ROOT" "$mode" "global skills"
+
+    for agent in "${PBOS_AGENTS[@]}"; do
+        seed_runtime_tree "$BOOTSTRAP_AGENTS_ROOT/$agent" "$AGENTS_ROOT/$agent" "$mode" "agent workspace ($agent)"
+    done
+}
+
+configure_openclaw_runtime_layout() {
+    if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+        return 0
+    fi
+
+    node - "$OPENCLAW_CONFIG_PATH" "$OPENCLAW_WORKSPACE_ROOT" "$AGENTS_ROOT" "${HOME}/.openclaw/agents" "${PBOS_AGENTS[*]}" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const [configPath, workspaceRoot, agentsRoot, agentDirRoot, agentListRaw] = process.argv.slice(2);
+const pbosAgents = agentListRaw.split(/\s+/).filter(Boolean);
+
+try {
+  const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  cfg.agents = cfg.agents || {};
+  cfg.agents.defaults = cfg.agents.defaults || {};
+  cfg.agents.defaults.workspace = workspaceRoot;
+  cfg.agents.list = Array.isArray(cfg.agents.list) ? cfg.agents.list : [];
+
+  for (const agent of pbosAgents) {
+    const workspace = path.join(agentsRoot, agent);
+    const agentDir = path.join(agentDirRoot, agent, "agent");
+    const existing = cfg.agents.list.find((item) => item && item.id === agent);
+    if (existing) {
+      existing.name = existing.name || agent;
+      existing.workspace = workspace;
+      existing.agentDir = existing.agentDir || agentDir;
+    } else {
+      cfg.agents.list.push({
+        id: agent,
+        name: agent,
+        workspace,
+        agentDir,
+      });
+    }
+  }
+
+  fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
+  process.stdout.write("OK: OpenClaw runtime layout updated for self-contained Akki runtime\n");
+} catch (err) {
+  process.stderr.write(`WARN: Failed to update OpenClaw runtime layout: ${err.message}\n`);
+}
+NODE
+}
+
+validate_self_contained_runtime() {
+    local failed=0
+
+    if [ ! -d "$DOMAINS_ROOT/pb-os" ]; then
+        echo "ERROR: Self-contained domain root missing at $DOMAINS_ROOT/pb-os"
+        failed=1
+    fi
+
+    if [ ! -d "$SKILLS_ROOT" ]; then
+        echo "ERROR: Self-contained workspace skills missing at $SKILLS_ROOT"
+        failed=1
+    fi
+
+    if [ ! -d "$OPENCLAW_GLOBAL_SKILLS_ROOT" ]; then
+        echo "ERROR: Self-contained global skills missing at $OPENCLAW_GLOBAL_SKILLS_ROOT"
+        failed=1
+    fi
+
+    for agent in "${PBOS_AGENTS[@]}"; do
+        local workspace_dir="$AGENTS_ROOT/$agent"
+        local definition_dir="${HOME}/.openclaw/agents/$agent/agent"
+        if [ ! -d "$workspace_dir" ]; then
+            echo "ERROR: Missing self-contained workspace for $agent at $workspace_dir"
+            failed=1
+            continue
+        fi
+        for required_file in SOUL.md IDENTITY.md TOOLS.md HEARTBEAT.md AGENTS.md USER.md; do
+            if [ ! -f "$workspace_dir/$required_file" ]; then
+                echo "ERROR: Missing $required_file in $workspace_dir"
+                failed=1
+            fi
+        done
+        if [ ! -f "$definition_dir/SOUL.md" ]; then
+            echo "ERROR: Missing OpenClaw SOUL.md for $agent at $definition_dir"
+            failed=1
+        fi
+        if [ ! -d "$workspace_dir/skills" ]; then
+            echo "ERROR: Missing agent-local skills for $agent at $workspace_dir/skills"
+            failed=1
+        fi
+    done
+
+    node - "$OPENCLAW_CONFIG_PATH" "$AGENTS_ROOT" "${PBOS_AGENTS[*]}" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const [configPath, agentsRoot, agentListRaw] = process.argv.slice(2);
+const pbosAgents = agentListRaw.split(/\s+/).filter(Boolean);
+let failed = false;
+try {
+  const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const list = Array.isArray(cfg?.agents?.list) ? cfg.agents.list : [];
+  for (const agent of pbosAgents) {
+    const entry = list.find((item) => item && item.id === agent);
+    if (!entry) {
+      process.stdout.write(`ERROR: OpenClaw config missing agent entry for ${agent}\n`);
+      failed = true;
+      continue;
+    }
+    const expectedWorkspace = path.join(agentsRoot, agent);
+    if (entry.workspace !== expectedWorkspace) {
+      process.stdout.write(`ERROR: Agent ${agent} workspace mismatch (${entry.workspace || "unset"} != ${expectedWorkspace})\n`);
+      failed = true;
+    }
+  }
+} catch (err) {
+  process.stdout.write(`ERROR: Could not validate OpenClaw config: ${err.message}\n`);
+  failed = true;
+}
+process.exit(failed ? 1 : 0);
+NODE
+    if [ $? -ne 0 ]; then
+        failed=1
+    fi
+
+    if [ $failed -ne 0 ]; then
+        echo "ERROR: Self-contained OpenClaw runtime validation failed"
+        exit 1
+    fi
+
+    echo "OK: Self-contained OpenClaw runtime validation passed"
 }
 
 configure_openclaw_gateway_defaults() {
@@ -512,13 +822,17 @@ if [ "$DRY_RUN" = true ]; then
     exit 0
 fi
 
+RUNTIME_COPY_MODE="$(runtime_copy_mode)"
+echo "OpenClaw runtime seed mode: $RUNTIME_COPY_MODE"
+provision_self_contained_runtime "$RUNTIME_COPY_MODE"
+
 # OpenClaw onboard (install mode only; upgrade mode must not re-onboard)
 if [ "$INSTALL_MODE" = "install" ]; then
     echo ""
     echo "OpenClaw will now guide you through full setup."
     echo ""
     openclaw onboard \
-        --workspace "$SCRIPT_DIR/workspace" \
+        --workspace "$OPENCLAW_WORKSPACE_ROOT" \
         --gateway-bind "$DESIRED_GATEWAY_BIND"
 else
     if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
@@ -533,6 +847,7 @@ echo "Syncing OpenClaw gateway token..."
 sync_openclaw_token
 apply_workspace_openclaw_template
 configure_openclaw_gateway_defaults
+configure_openclaw_runtime_layout
 write_runtime_env
 PUBLIC_HOST="$(sanitize_host "$(detect_public_host)")"
 FRONTEND_ORIGIN="http://${PUBLIC_HOST}:3000"
@@ -579,7 +894,7 @@ AGENT_CONFLICT_LOG="$SCRIPT_DIR/.akki-agent-conflicts.log"
 mkdir -p "$SCRIPT_DIR/.akki"
 : > "$AGENT_CONFLICT_LOG"
 for agent in "${PBOS_AGENTS[@]}"; do
-    AGENT_OUTPUT="$(openclaw agents add "$agent" --workspace "$SCRIPT_DIR/agents/$agent" 2>&1)"
+    AGENT_OUTPUT="$(openclaw agents add "$agent" --workspace "$AGENTS_ROOT/$agent" 2>&1)"
     AGENT_EXIT=$?
     if [ $AGENT_EXIT -eq 0 ]; then
       echo "  OK: $agent registered"
@@ -589,9 +904,13 @@ for agent in "${PBOS_AGENTS[@]}"; do
       echo "  WARN: $agent registration issue"
       echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $agent :: $AGENT_OUTPUT" >> "$AGENT_CONFLICT_LOG"
     fi
+    seed_agent_runtime_definition "$agent" "$RUNTIME_COPY_MODE"
 done
+configure_openclaw_runtime_layout
+validate_self_contained_runtime
 
-echo "OK: Packaged skills are available at $SKILLS_ROOT"
+echo "OK: Shared skills seeded at $SKILLS_ROOT"
+echo "OK: Global skills seeded at $OPENCLAW_GLOBAL_SKILLS_ROOT"
 if [ ! -d "$DOMAINS_ROOT/pb-os" ]; then
     echo "ERROR: Expected PB-OS domain at $DOMAINS_ROOT/pb-os"
     exit 1
@@ -681,6 +1000,7 @@ OPENCLAW_GATEWAY_URL=ws://host.docker.internal:18789
 OPENCLAW_WORKSPACE_ROOT=$OPENCLAW_WORKSPACE_ROOT
 AGENTS_ROOT=$AGENTS_ROOT
 DOMAINS_ROOT=$DOMAINS_ROOT
+OPENCLAW_GLOBAL_SKILLS_ROOT=$OPENCLAW_GLOBAL_SKILLS_ROOT
 AKKI_REPO_ROOT=$SCRIPT_DIR
 AKKI_SKILLS_ROOT=$SKILLS_ROOT
 AKKI_RUNTIME_ENV=$RUNTIME_ENV_FILE
@@ -732,6 +1052,8 @@ echo "   OpenClaw:        http://127.0.0.1:18789/?token=$OPENCLAW_TOKEN"
 echo "   Mission Control: $FRONTEND_ORIGIN  (Login: $OPENCLAW_TOKEN)"
 echo "   Convex DB:       $CONVEX_URL"
 echo "   Webhook Bridge:  http://127.0.0.1:3003"
+echo "   Runtime Root:    $OPENCLAW_RUNTIME_ROOT"
+echo "   Agent Root:      $AGENTS_ROOT"
 echo "   Domain Root:     $DOMAINS_ROOT/pb-os"
 echo ""
 echo "Next Step: Open Mission Control and chat with your agents!"
