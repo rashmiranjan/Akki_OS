@@ -9,9 +9,21 @@ cd Akki_OS
 bash install.sh
 ```
 
+Windows Command Prompt / PowerShell:
+```bat
+git clone https://github.com/rashmiranjan/Akki_OS
+cd Akki_OS
+install.bat
+```
+
 Upgrade an existing local install:
 ```bash
 bash install.sh --upgrade --non-interactive
+```
+
+Windows upgrade:
+```bat
+install.bat --upgrade --non-interactive
 ```
 
 Explicitly resync the live OpenClaw runtime from repo seed files:
@@ -19,10 +31,15 @@ Explicitly resync the live OpenClaw runtime from repo seed files:
 bash install.sh --upgrade --resync-runtime
 ```
 
+Windows runtime resync:
+```bat
+install.bat --upgrade --resync-runtime
+```
+
 ## Runtime Model
 - The repo is the bootstrap source for agents, shared skills, and PB-OS domains.
 - OpenClaw keeps the live runtime in `~/.openclaw`.
-- VPS installs are seeded into `~/.openclaw/akki` so the running system does not depend on the repo checkout.
+- Linux, macOS, and Windows installs are seeded into a self-contained runtime under `.openclaw/akki` so the running system does not depend on the repo checkout.
 - Shared global skills are mirrored into `~/.openclaw/skills`.
 - Normal upgrades preserve live OpenClaw state and only fill missing runtime pieces.
 
@@ -46,7 +63,9 @@ Akki_OS/
 ├── mission_control/   # Backend + frontend control plane
 ├── platform/          # Bootstrap and operations docs
 ├── tools/             # Installer support scripts
-└── install.sh         # Canonical install/upgrade entrypoint
+├── install.sh         # Linux/macOS install/upgrade entrypoint
+├── install.bat        # Windows install/upgrade entrypoint
+└── start.bat          # Windows wrapper that delegates to install.bat
 ```
 
 ## What The Installer Does
@@ -57,6 +76,7 @@ Akki_OS/
 - Seeds agent souls/identity files into OpenClaw-managed agent directories
 - Seeds shared/global skills and PB-OS domains into the self-contained runtime
 - Validates runtime provisioning, not just repo asset presence
+- Supports explicit runtime resync for live installs
 - Writes Mission Control environment values
 - Deploys Convex if credentials are provided
 - Starts Mission Control via Docker Compose
