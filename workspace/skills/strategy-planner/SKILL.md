@@ -39,4 +39,4 @@ curl -X POST http://localhost:3003
 2. Report to webhook:
 curl -X POST http://127.0.0.1:3003 \
   -H "Content-Type: application/json" \
-  -d '{"agent": "shuri", "action": "strategy_updated", "message": "7-day calendar ready"}'
+  -d '{"agent": "atlas", "action": "strategy_updated", "message": "7-day calendar ready"}'

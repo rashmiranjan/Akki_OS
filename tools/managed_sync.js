@@ -180,28 +180,19 @@ function runCheck(opts) {
   const manifest = loadManifest(opts.manifestPath);
   const state = readJsonSafe(opts.stateFile, {});
   const agentsRoot = path.join(opts.repoRoot, "agents");
-  const skillsSrcRoot = path.join(opts.repoRoot, "skills");
-  const skillsDstRoot = path.join(opts.repoRoot, "workspace", "skills");
+  const domainsRoot = path.join(opts.repoRoot, "domains");
+  const packagedSkillsRoot = path.join(opts.repoRoot, "workspace", "skills");
+  const openclawHome = path.dirname(opts.openclawConfig);
+  const selfContainedRoot = path.join(openclawHome, "akki");
 
   const managedAgents = listSubdirs(agentsRoot);
-  const managedSkills = listSubdirs(skillsSrcRoot);
+  const managedDomains = listSubdirs(domainsRoot);
+  const managedSkills = listSubdirs(packagedSkillsRoot);
 
-  const collisions = [];
-  for (const skill of managedSkills) {
-    const src = path.join(skillsSrcRoot, skill);
-    const dst = path.join(skillsDstRoot, skill);
-    if (fs.existsSync(dst)) {
-      const srcHash = hashTree(src);
-      const dstHash = hashTree(dst);
-      if (srcHash !== dstHash) {
-        collisions.push({
-          kind: "skill_local_modification",
-          name: skill,
-          destination: dst,
-        });
-      }
-    }
-  }
+  const missingComponents = [];
+  if (!managedAgents.length) missingComponents.push("agents");
+  if (!managedDomains.length) missingComponents.push("domains");
+  if (!managedSkills.length) missingComponents.push("workspace/skills");
 
   return {
     success: true,
@@ -214,8 +205,23 @@ function runCheck(opts) {
     openclawConfigPath: opts.openclawConfig,
     openclawConfigExists: fs.existsSync(opts.openclawConfig),
     managedAgents,
+    managedDomains,
     managedSkills,
-    collisions,
+    missingComponents,
+    repoLocalRuntime: {
+      workspaceRoot: path.join(opts.repoRoot, "workspace"),
+      agentsRoot,
+      domainsRoot,
+      skillsRoot: packagedSkillsRoot,
+    },
+    selfContainedRuntime: {
+      root: selfContainedRoot,
+      workspaceRoot: path.join(selfContainedRoot, "workspace"),
+      agentsRoot: path.join(selfContainedRoot, "agents"),
+      domainsRoot: path.join(selfContainedRoot, "domains"),
+      skillsRoot: path.join(selfContainedRoot, "workspace", "skills"),
+      globalSkillsRoot: path.join(openclawHome, "skills"),
+    },
   };
 }
 
@@ -227,9 +233,9 @@ function runSync(opts) {
   ensureDir(stateDir);
   ensureDir(logsDir);
 
-  const skillsSrcRoot = path.join(opts.repoRoot, "skills");
-  const skillsDstRoot = path.join(opts.repoRoot, "workspace", "skills");
-  const incomingRoot = path.join(skillsDstRoot, "_incoming");
+  const packagedSkillsRoot = path.join(opts.repoRoot, "workspace", "skills");
+  const domainsRoot = path.join(opts.repoRoot, "domains");
+  const runtimeEnvPath = path.join(opts.repoRoot, ".akki", "runtime.env");
 
   const report = {
     ...check,
@@ -237,9 +243,7 @@ function runSync(opts) {
     startedAt: nowIso(),
     dryRun: opts.dryRun,
     backups: [],
-    copiedSkills: [],
-    preservedSkills: [],
-    incomingSkills: [],
+    validated: [],
     conflicts: [],
     fromVersion: opts.fromVersion || "",
     manifestPath: opts.manifestPath,
@@ -258,54 +262,35 @@ function runSync(opts) {
         fs.copyFileSync(opts.openclawConfig, backupTarget);
         report.backups.push({ kind: "openclaw_config", path: backupTarget });
       }
-      if (fs.existsSync(skillsDstRoot)) {
+      if (fs.existsSync(packagedSkillsRoot)) {
         const backupSkills = path.join(backupDir, "workspace-skills");
-        copyDir(skillsDstRoot, backupSkills);
+        copyDir(packagedSkillsRoot, backupSkills);
         report.backups.push({ kind: "workspace_skills", path: backupSkills });
       }
-    }
-  }
-
-  const managedSkills = listSubdirs(skillsSrcRoot);
-  if (!opts.dryRun) {
-    ensureDir(skillsDstRoot);
-    ensureDir(incomingRoot);
-  }
-
-  for (const skill of managedSkills) {
-    const src = path.join(skillsSrcRoot, skill);
-    const dst = path.join(skillsDstRoot, skill);
-
-    if (!fs.existsSync(dst)) {
-      if (!opts.dryRun) {
-        copyDir(src, dst);
+      if (fs.existsSync(runtimeEnvPath)) {
+        const runtimeBackup = path.join(backupDir, "runtime.env");
+        fs.copyFileSync(runtimeEnvPath, runtimeBackup);
+        report.backups.push({ kind: "runtime_env", path: runtimeBackup });
       }
-      report.copiedSkills.push(skill);
-      continue;
     }
+  }
 
-    const srcHash = hashTree(src);
-    const dstHash = hashTree(dst);
-    if (srcHash === dstHash) {
-      report.preservedSkills.push(skill);
-      continue;
+  const requiredRoots = [
+    { kind: "agents", path: path.join(opts.repoRoot, "agents") },
+    { kind: "domains", path: domainsRoot },
+    { kind: "workspace", path: path.join(opts.repoRoot, "workspace") },
+    { kind: "skills", path: packagedSkillsRoot },
+  ];
+
+  for (const item of requiredRoots) {
+    if (!fs.existsSync(item.path)) {
+      throw new Error(`Missing required ${item.kind} directory: ${item.path}`);
     }
-
-    const incomingDst = path.join(incomingRoot, skill);
-    report.conflicts.push({
-      kind: "skill_local_modification",
-      skill,
-      destination: dst,
-      incoming: incomingDst,
+    report.validated.push({
+      kind: item.kind,
+      path: item.path,
+      checksum: hashTree(item.path),
     });
-
-    if (!opts.dryRun) {
-      if (fs.existsSync(incomingDst)) {
-        fs.rmSync(incomingDst, { recursive: true, force: true });
-      }
-      copyDir(src, incomingDst);
-    }
-    report.incomingSkills.push(skill);
   }
 
   report.completedAt = nowIso();

@@ -1,0 +1,5 @@
+Use projects/_template as the canonical scaffold for new PB-OS projects.
+Copy `_template` to `projects/<slug>/` and then update:
+- README.md
+- project.yaml
+- 00-onboarding/*

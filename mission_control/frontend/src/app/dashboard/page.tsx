@@ -214,7 +214,7 @@ export default function DashboardPage() {
                     <div className="relative z-10">
                       <h3 className="text-xl font-bold mb-2">Akki is Ready</h3>
                       <p className="text-indigo-100 text-sm mb-6 leading-relaxed">
-                        Your agents are standing by. Trigger Fury for research or Loki to generate posts.
+                        Your PB-OS team is standing by. Trigger Oracle for audience intelligence or Scribe for fresh drafts.
                       </p>
                       <button
                         onClick={() => window.location.href = "/agents"}
@@ -238,9 +238,9 @@ export default function DashboardPage() {
                     ) : (
                       <div className="space-y-3">
                         {[
-                          { label: 'User Profile', stored: (stats?.byAgent?.['jarvis'] ?? 0) > 0 },
-                          { label: 'Pain Points', stored: (stats?.byAgent?.['jarvis'] ?? 0) > 1 },
-                          { label: 'Voice Profile', stored: (stats?.byAgent?.['loki'] ?? 0) > 0 },
+                          { label: 'Founder Profile', stored: (stats?.byAgent?.['atlas'] ?? 0) > 0 },
+                          { label: 'Audience Pains', stored: (stats?.byAgent?.['archivist'] ?? 0) > 0 },
+                          { label: 'Voice Profile', stored: (stats?.byAgent?.['scribe'] ?? 0) > 0 },
                           { label: 'Post Drafts', stored: (stats?.approvedDrafts ?? 0) > 0 },
                           { label: 'Activity Log', stored: (stats?.totalActivity ?? 0) > 0 },
                         ].map((item, i) => (
@@ -261,7 +261,6 @@ export default function DashboardPage() {
     </DashboardShell>
   );
 }
-
 
 
 

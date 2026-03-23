@@ -1,0 +1,73 @@
+version: 1
+name: pb-os-agent-charter
+scope: /domains/pb-os/projects/*
+
+agents:
+  atlas:
+    role: orchestrator
+    owns:
+      - 00-onboarding
+      - 07-operations
+    contributes:
+      - 01-founder-product-intelligence
+      - 03-positioning-narrative-system
+      - 08-memory
+
+  archivist:
+    role: research-collector
+    owns:
+      - 02-research
+    contributes:
+      - 01-founder-product-intelligence/competitor-intelligence
+      - 02-audience-market-intelligence
+
+  oracle:
+    role: strategic-synthesis
+    owns: []
+    contributes:
+      - 01-founder-product-intelligence
+      - 02-audience-market-intelligence
+      - 03-positioning-narrative-system
+
+  pulse:
+    role: distribution-activation
+    owns:
+      - 04-idea-content-studio/content-by-format
+      - 05-network-influence-engine/distribution
+    contributes:
+      - 04-idea-content-studio/rehash-repurpose
+      - 05-network-influence-engine/engagement-ops
+
+  scribe:
+    role: content-production
+    owns:
+      - 04-idea-content-studio/drafts
+      - 04-idea-content-studio/ideas
+    contributes:
+      - 04-idea-content-studio/content-by-format
+
+  keith:
+    role: analytics-iteration
+    owns:
+      - 06-analytics-iteration
+    contributes:
+      - 08-memory/lessons-learned.md
+
+  sentinel:
+    role: governance-quality
+    owns:
+      - 06-governance
+    contributes:
+      - 08-memory/decisions-log.md
+
+handoff:
+  required_template: /domains/pb-os/_shared/templates/handoff.md
+  destination: 07-operations/handoffs/
+  naming: YYYY-MM-DD-from-to-topic.md
+
+required_updates:
+  on_decision:
+    - 08-memory/decisions-log.md
+  on_weekly_cycle:
+    - 06-analytics-iteration/insights/weekly-insights.md
+    - 06-analytics-iteration/iteration/weekly-retros.md

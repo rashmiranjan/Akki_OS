@@ -10,7 +10,7 @@ async function testMainAgent() {
     console.log('--- Testing Akki (Main) Agent via Gateway ---');
     try {
         const result = await gateway.call('agent', {
-            agent: 'main',
+            agent: 'atlas',
             action: 'chat',
             params: {
                 message: 'How many agents are there?',

@@ -4,7 +4,14 @@ credentials/
 *.log
 node_modules/
 .DS_Store
+.openclaw/
+.akki-agent-conflicts.log
 .akki/
 .last-managed-sync.json
+mission_control/backend/openclaw_vps.json
 workspace/skills/_incoming/
 docs/
+skills_copy/
+agents_copy/
+agents/**/.git/
+agents/**/.DS_Store

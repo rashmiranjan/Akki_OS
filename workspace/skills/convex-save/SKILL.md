@@ -1,21 +1,24 @@
 ---
-name: convex via webhook-save
-description: Data ko convex via webhook database mein save karo
+name: convex-save
+description: Mission Control bridge ke through Convex-backed app data save karo
 ---
 
-# convex via webhook Save Skill
+# Convex Save Skill
 
 ## Purpose
-Data ko convex via webhook database mein save karo
+Mission Control ke supported webhook/API bridge ke through Convex-backed PB-OS data save karna.
 
 ## Usage
-curl -X POST http://localhost:3003
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1aWpvcGR4enB3cWxoZXl4cWRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTY1NDYyMiwiZXhwIjoyMDg3MjMwNjIyfQ.-Zws-y7D3n7pVtrkg-UVtJxJ-Ar7M0quIgfhzEQZPms" \
-  -H "Content-Type: application/json" \
-  -d '{"column": "value"}'
+node scripts/run.js drafts '{"agent":"scribe","content":"LinkedIn post body","platform":"linkedin"}'
+node scripts/run.js activity '{"agent":"oracle","action":"research_complete","message":"Competitive scan ready"}'
+node scripts/run.js memory '{"agent":"atlas","type":"UserProfile","data":{"name":"Akki"}}'
 
-## Tables Available
-- activity (agent, action, message, user_id)
-- drafts (content, platform, status, user_id)
-- pain_points (text, source, user_id)
-- ideas (title, angle, user_id)
+## Supported Targets
+- `drafts`
+- `activity`
+- `memory`
+
+## Notes
+- `memory` writes go to `POST /api/v1/memory`
+- other targets go through the webhook bridge at `http://localhost:3003`
+- direct `rest/v1` SQL-style writes are not part of the supported runtime

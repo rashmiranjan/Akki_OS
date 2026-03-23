@@ -1,17 +1,15 @@
 # Convex Schema
 
-Database URL: from user's CONVEX_URL env variable
+The canonical Convex schema for Akki PB-OS lives in:
 
-## Tables
-- activity: agent, action, message, user_id, timestamp
-- config: key, value
-- drafts: agent, content, platform, status, timestamp
+- `mission_control/backend/convex/schema.ts`
+- `mission_control/backend/convex/activity.ts`
+- `mission_control/backend/convex/drafts.ts`
+- `mission_control/backend/convex/memory.ts`
+- `mission_control/backend/convex/projectDocuments.ts`
+- `mission_control/backend/convex/strategy.ts`
 
-## Usage
-All agents report via webhook:
-POST http://localhost:3003
-{"agent": "loki", "action": "draft", "message": "content here"}
-
-## Setup
-User creates free account at https://convex.dev
-Agent collects CONVEX_URL during onboarding
+## Runtime Contract
+- Mission Control backend owns the supported Convex API path.
+- Skills should write through Mission Control endpoints or the webhook bridge.
+- SQL schema files and direct `rest/v1` patterns are legacy references, not active runtime behavior.

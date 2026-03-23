@@ -19,36 +19,36 @@ export class AgentLogicService {
         return AgentLogicService.instance;
     }
 
-    public async runLoki(userId: string): Promise<any> {
-        console.log(`🎬 [Loki] Preparing context for user ${userId}...`);
-        const LokiPayload = {
-            agentId: 'loki',
-            action: 'write_post',
-            params: { platforms: ['linkedin', 'twitter'], user_id: userId }
+    public async runScribe(userId: string): Promise<any> {
+        console.log(`🎬 [Scribe] Preparing content sprint for user ${userId}...`);
+        const payload = {
+            agentId: 'scribe',
+            action: 'content_sprint',
+            params: { formats: ['linkedin', 'twitter'], user_id: userId }
         };
-        return this.gatewayService.triggerAgent('loki', JSON.stringify(LokiPayload), userId);
+        return this.gatewayService.triggerAgent('scribe', JSON.stringify(payload), userId);
     }
 
-    public async runFury(userId: string): Promise<any> {
-        console.log(`🔍 [Fury] Starting contextual research for user ${userId}...`);
-        const FuryPayload = {
-            agentId: 'fury',
+    public async runArchivist(userId: string): Promise<any> {
+        console.log(`📚 [Archivist] Starting contextual research for user ${userId}...`);
+        const payload = {
+            agentId: 'archivist',
             action: 'deep_scan',
             params: { sources: ['reddit', 'linkedin', 'indiehackers'], depth: 'high', user_id: userId }
         };
-        return this.gatewayService.triggerAgent('fury', JSON.stringify(FuryPayload), userId);
+        return this.gatewayService.triggerAgent('archivist', JSON.stringify(payload), userId);
     }
 
-    public async runJarvisOnboarding(userId: string, context: any): Promise<any> {
-        console.log(`🤖 [Jarvis] Initializing memory for new user ${userId}...`);
+    public async runAtlasOnboarding(userId: string, context: any): Promise<any> {
+        console.log(`🤖 [Atlas] Initializing memory for new user ${userId}...`);
         // Save to permanent memory (Convex)
         try {
             await this.memoryService.saveOnboardingMemory(userId, context);
-            await logActivity(userId, 'jarvis', 'onboarding', `Onboarding complete for user ${userId}`);
-            console.log(`💾 [Jarvis] Memory saved for user ${userId}`);
+            await logActivity(userId, 'atlas', 'onboarding', `Onboarding complete for user ${userId}`);
+            console.log(`💾 [Atlas] Memory saved for user ${userId}`);
         } catch (e: any) {
-            console.error(`⚠️ [Jarvis] Memory save failed:`, e.message);
+            console.error(`⚠️ [Atlas] Memory save failed:`, e.message);
         }
-        return this.runFury(userId);
+        return this.runArchivist(userId);
     }
 }

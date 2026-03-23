@@ -1,3 +1,8 @@
+-- Legacy archive only.
+-- This file documents an older Supabase/Postgres model and is not the active
+-- runtime schema for Akki PB-OS. The canonical schema now lives under
+-- mission_control/backend/convex/.
+
 CREATE TABLE IF NOT EXISTS accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE,

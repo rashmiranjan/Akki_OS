@@ -30,6 +30,8 @@ import { getOnboarding, completeOnboarding } from './controllers/onboardingContr
 import { postUpgradeCheck, postUpgradeRun, getUpgradeJobStatus } from './controllers/systemController';
 import { initCronJobs } from './services/cronService';
 import { convex, convexApi } from './lib/convexClient';
+import { getProjectDocument, listProjectDocuments, listProjects, syncProjects } from './controllers/projectDocumentController';
+import { syncAllProjectDocuments } from './services/projectDocumentSyncService';
 
 app.get('/healthz', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -56,6 +58,10 @@ app.post('/api/v1/drafts', async (req, res) => {
 app.patch('/api/v1/drafts/:id', updateDraft);
 app.post('/api/v1/chat/send', sendMessage);
 app.get('/api/v1/chat/history', getHistory);
+app.get('/api/v1/projects', listProjects);
+app.post('/api/v1/projects/sync', syncProjects);
+app.get('/api/v1/projects/:slug/documents', listProjectDocuments);
+app.get('/api/v1/projects/:slug/document', getProjectDocument);
 
 // Memory routes
 app.get('/api/v1/memory', getMemory);
@@ -75,7 +81,7 @@ app.post('/api/v1/strategy', async (req: any, res: any) => {
     const userId = req.user?.id || 'local-user';
     const { week, goal, frequency, persona, days, generatedBy } = req.body;
     try {
-        const id = await convex.mutation(convexApi.strategy.save, { userId, week, goal, frequency, persona, days, generatedBy: generatedBy || 'shuri' });
+        const id = await convex.mutation(convexApi.strategy.save, { userId, week, goal, frequency, persona, days, generatedBy: generatedBy || 'atlas' });
         res.json({ success: true, id });
     } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
 });
@@ -93,5 +99,7 @@ GatewayService.getInstance().connect().catch(console.error);
 app.listen(PORT, () => {
     console.log(`ðŸš€ Mission Control running on port ${PORT}`);
     initCronJobs();
+    syncAllProjectDocuments()
+        .then((result) => console.log(`PB-OS project sync complete (${result.projectCount} projects)`))
+        .catch((error) => console.error("PB-OS project sync failed:", error.message));
 });
-

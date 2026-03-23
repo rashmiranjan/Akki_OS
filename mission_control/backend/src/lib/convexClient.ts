@@ -10,6 +10,13 @@ if (!CONVEX_URL) {
 export const convex = new ConvexHttpClient(CONVEX_URL);
 
 export const convexApi = {
+    projectDocuments: {
+        upsert: makeFunctionReference<"mutation">("projectDocuments:upsert"),
+        deleteMissingForSlug: makeFunctionReference<"mutation">("projectDocuments:deleteMissingForSlug"),
+        listProjects: makeFunctionReference<"query">("projectDocuments:listProjects"),
+        listDocuments: makeFunctionReference<"query">("projectDocuments:listDocuments"),
+        getDocument: makeFunctionReference<"query">("projectDocuments:getDocument"),
+    },
     memory: {
         list: makeFunctionReference<"query">("memory:list"),
         upsert: makeFunctionReference<"mutation">("memory:upsert"),
@@ -36,4 +43,3 @@ export const convexApi = {
         updateByRunId: makeFunctionReference<"mutation">("chat:updateByRunId"),
     },
 };
-

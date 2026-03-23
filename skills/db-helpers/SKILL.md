@@ -1,24 +1,31 @@
 ---
 name: db-helpers
-description: convex via webhook ke saath easily interact karna
+description: Mission Control aur Convex-backed PB-OS data ko helper functions se access karo
 ---
 
 # DB Helpers Skill
 
 ## Purpose
-convex via webhook ke saath easily interact karna
+Mission Control ke canonical Convex path ke through PB-OS memory, drafts, activity, aur mirrored project docs ko access karna.
 
 ## Setup
-convex via webhook_URL aur convex via webhook_SERVICE_KEY .env mein daalo
+- `OPENCLAW_TOKEN` ya `LOCAL_AUTH_TOKEN`
+- Optional: `MISSION_CONTROL_API_URL` (default `http://localhost:8000`)
+- Optional: `WEBHOOK_BASE_URL` (default `http://localhost:3003`)
 
 ## Functions
-- saveUser(userData)
-- getUser(userId)
-- saveDraft(draftData)
-- getDrafts(userId)
-- logActivity(agent, action, message)
+- `getUser()`
+- `logActivity(agent, action, message, user_id?)`
+- `saveDraft({ agent, content, platform, user_id })`
+- `saveMemory({ agent, type, data, user_id })`
+- `getDrafts()`
+- `getMemory({ agent?, type? })`
+- `getProjectDocuments(slug, category?)`
+- `saveConfig(key, value)`
 
 ## Usage
 const db = require('./db-helpers');
-await db.logActivity('fury', 'research', 'Found pain points');
-await db.saveDraft({content, platform, user_id});
+await db.logActivity('oracle', 'research_complete', 'Found 5 positioning gaps');
+await db.saveDraft({ agent: 'scribe', content, platform: 'linkedin' });
+await db.saveMemory({ agent: 'atlas', type: 'UserProfile', data: profile });
+await db.getProjectDocuments('my-project', 'operations');

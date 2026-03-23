@@ -17,7 +17,7 @@ const QUESTIONS = [
     {
         id: 'do',
         question: "What do you do?",
-        description: "Tell Jarvis about your product, service, or unique selling proposition.",
+        description: "Tell Atlas what you build, sell, or want to become known for.",
         icon: Briefcase,
         placeholder: "I build AI agents for real estate brokers..."
     },
@@ -82,7 +82,7 @@ export const OnboardingFlow = ({ onComplete }: { onComplete: () => void }) => {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    agentName: 'jarvis',
+                    agentName: 'atlas',
                     command: 'initialize_phase_0',
                     context: answers
                 })
@@ -104,7 +104,7 @@ export const OnboardingFlow = ({ onComplete }: { onComplete: () => void }) => {
                 </div>
                 <h2 className="text-3xl font-bold text-slate-900 mb-2">Setting up Akki OS</h2>
                 <p className="text-slate-500 max-w-md mx-auto">
-                    Jarvis is now parsing your intent and initializing Fury for market scan...
+                    Atlas is initializing your PB-OS workspace and briefing the specialist agents...
                 </p>
                 <div className="mt-8 flex gap-2">
                     <div className="w-2 h-2 rounded-full bg-indigo-600 animate-ping" />
@@ -177,4 +177,3 @@ export const OnboardingFlow = ({ onComplete }: { onComplete: () => void }) => {
         </div>
     );
 };
-

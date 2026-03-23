@@ -75,10 +75,10 @@ export function LandingShell({ children }: { children: ReactNode }) {
           <div className="footer-column">
             <h4>Agents</h4>
             <div className="footer-links">
-              <Link href="/dashboard">Jarvis — Orchestrator</Link>
-              <Link href="/dashboard">Loki — Writer</Link>
-              <Link href="/dashboard">Fury — Researcher</Link>
-              <Link href="/dashboard">Atlas — Publisher</Link>
+              <Link href="/dashboard">Atlas — Orchestrator</Link>
+              <Link href="/dashboard">Archivist — Memory</Link>
+              <Link href="/dashboard">Oracle — Intelligence</Link>
+              <Link href="/dashboard">Scribe — Content</Link>
             </div>
           </div>
 

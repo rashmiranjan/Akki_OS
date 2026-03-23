@@ -1,4 +1,3 @@
-require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -18,9 +17,12 @@ async function getConvex() {
   if (!url) return null;
   try {
     if (!convexClient) {
-      const { ConvexHttpClient } = require('convex/browser');
+      const { ConvexHttpClient } = require(path.join(
+        __dirname,
+        '../../../mission_control/backend/node_modules/convex/browser'
+      ));
       convexClient = new ConvexHttpClient(url);
-      convexApi = require('../../../convex/_generated/api');
+      convexApi = require('../../../mission_control/backend/convex/_generated/api');
     }
     return { client: convexClient, api: convexApi.api };
   } catch (e) {
@@ -49,8 +51,13 @@ function updateEnvFile(filePath, key, value) {
 
 async function forwardToMissionControl(data) {
   const token = process.env.OPENCLAW_TOKEN || process.env.LOCAL_AUTH_TOKEN || '';
+  const baseUrl = process.env.MISSION_CONTROL_API_URL || 'http://localhost:8000';
+  const route =
+    data.table === 'memory' || (data.type && data.data)
+      ? '/api/v1/memory'
+      : '/api/v1/activity';
   try {
-    const response = await fetch('http://localhost:8000/api/v1/activity', {
+    const response = await fetch(`${baseUrl}${route}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,19 +85,26 @@ async function saveDirectToConvex(data, rawBody) {
   }
 
   try {
-    if (data.table === 'drafts' || data.content) {
+    if (data.table === 'memory' || (data.type && data.data)) {
+      await convex.client.mutation(convex.api.memory.upsert, {
+        userId: data.user_id || data.userId || 'local-user',
+        agent: data.agent || 'system',
+        type: data.type || 'Generic',
+        data: data.data || data.payload || {},
+      });
+    } else if (data.table === 'drafts' || data.content) {
       await convex.client.mutation(convex.api.drafts.create, {
         content: data.content || data.message || rawBody,
         platform: data.platform || 'linkedin',
-        userId: data.user_id || 'local-user',
+        userId: data.user_id || data.userId || 'local-user',
         agent: data.agent || 'system',
       });
     } else {
       await convex.client.mutation(convex.api.activity.log, {
-        agent: data.agent || 'main',
+        userId: data.user_id || data.userId || 'local-user',
+        agent: data.agent || 'atlas',
         action: data.action || 'message',
         message: data.message || rawBody,
-        user_id: data.user_id || 'local-user',
       });
     }
     return true;

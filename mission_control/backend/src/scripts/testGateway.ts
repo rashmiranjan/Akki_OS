@@ -9,7 +9,7 @@ const gateway = GatewayService.getInstance();
 async function testConnection() {
     console.log('--- Testing Gateway Connection ---');
     try {
-        const result = await gateway.triggerAgent('jarvis', 'status_check');
+        const result = await gateway.triggerAgent('atlas', 'status_check');
         console.log('✅ Gateway Response:', result);
     } catch (err: any) {
         console.error('❌ Gateway Test Failed:', err.message);

@@ -5,14 +5,15 @@ import { DashboardSidebar } from "@/components/organisms/DashboardSidebar";
 import { SignedIn, SignedOut, useAuth } from "@/auth/clerk";
 import { SignedOutPanel } from "@/components/auth/SignedOutPanel";
 import { Send, Bot, User, RefreshCw } from "lucide-react";
+import { PBOS_AGENT_OPTIONS } from "@/lib/pbos-agents";
 
-const AGENTS = ["jarvis", "main", "loki", "fury", "echo", "shuri", "oracle", "pulse", "atlas", "vision"];
+const AGENTS = PBOS_AGENT_OPTIONS;
 
 type Message = { role: "user" | "agent"; text: string; time: string };
 
 export default function ChatPage() {
     const { getToken } = useAuth();
-    const [selectedAgent, setSelectedAgent] = useState("jarvis");
+    const [selectedAgent, setSelectedAgent] = useState("atlas");
     const [messages, setMessages] = useState<Record<string, Message[]>>({});
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);

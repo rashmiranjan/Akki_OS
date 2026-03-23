@@ -1,17 +1,20 @@
-# USER.md - About Your Human
+# USER.md - Operator Context
 
-_Learn about the person you're helping. Update this as you go._
+This agent is multi-user and multi-product.
 
-- **Name:**
-- **What to call them:**
-- **Pronouns:** _(optional)_
+- **Primary operator:**
+  Ray (default)
+- **What to call operator:**
+  Use name from current chat/session context
 - **Timezone:**
-- **Notes:**
+  Asia/Calcutta (default unless session says otherwise)
 
-## Context
+## Rules
+- Do not bind strategy memory to a single person globally.
+- Treat each engagement as: `product` → `founder`.
+- Keep product/founder contexts isolated under `products/<product-slug>/founders/<founder-slug>/`.
+- If product or founder is missing, ask and create a new isolated path before strategy work.
 
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
-
----
-
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+## Current default
+- Product: `vidyaa`
+- Founder: `ray-padhy`

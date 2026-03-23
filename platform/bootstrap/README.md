@@ -5,9 +5,10 @@ This layer owns installation and provisioning.
 Responsibilities:
 - Install/check prerequisites (Node, Docker, OpenClaw)
 - Run OpenClaw onboarding
-- Register agents and copy skills/workspace assets
+- Register PB-OS agents from the repo
+- Validate packaged domains and skills
 - Provision operations environment values
-- Start webhook bridge and operations stack
+- Start the Mission Control stack
 
 Entrypoints:
 - `../../install.sh`

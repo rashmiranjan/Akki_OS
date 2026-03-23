@@ -5,6 +5,7 @@ import { DashboardSidebar } from "@/components/organisms/DashboardSidebar";
 import { SignedIn, SignedOut, useAuth } from "@/auth/clerk";
 import { SignedOutPanel } from "@/components/auth/SignedOutPanel";
 import { Calendar, List, Sparkles, RefreshCw, Target, Users, Zap, Plus, X, Save } from "lucide-react";
+import { PBOS_AGENT_OPTIONS } from "@/lib/pbos-agents";
 
 const STATUS_COLORS: Record<string, string> = {
     scheduled: "bg-blue-100 text-blue-700",
@@ -13,12 +14,12 @@ const STATUS_COLORS: Record<string, string> = {
     published: "bg-emerald-100 text-emerald-700",
 };
 
-const AGENTS = ["loki","jarvis","shuri","oracle","fury","echo","pulse","atlas","vision","main"];
+const AGENTS = PBOS_AGENT_OPTIONS;
 const PLATFORMS = ["LinkedIn","Twitter","Both"];
 const STATUSES = ["pending","scheduled","drafted","published"];
 const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
-const EMPTY_FORM = { day:"Monday", date:"", theme:"", topic:"", platform:"LinkedIn", time:"10:00 AM IST", agent:"loki", status:"pending" };
+const EMPTY_FORM = { day:"Monday", date:"", theme:"", topic:"", platform:"LinkedIn", time:"10:00 AM IST", agent:"atlas", status:"pending" };
 
 export default function StrategyPage() {
     const { getToken } = useAuth();
@@ -63,7 +64,7 @@ export default function StrategyPage() {
         } catch (e) {}
     };
 
-    const triggerShuri = async () => {
+    const triggerAtlas = async () => {
         setTriggering(true);
         setMessage("");
         try {
@@ -71,10 +72,10 @@ export default function StrategyPage() {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/agents/trigger`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ agentName: "shuri", command: "regenerate_strategy" })
+                body: JSON.stringify({ agentName: "atlas", command: "regenerate_strategy" })
             });
             const data = await res.json();
-            setMessage(data.success ? "✅ Shuri is generating new strategy!" : "❌ Failed.");
+            setMessage(data.success ? "✅ Atlas is refreshing the strategic plan!" : "❌ Failed.");
             setTimeout(fetchStrategy, 15000);
         } catch { setMessage("❌ Connection failed."); }
         finally { setTriggering(false); setTimeout(() => setMessage(""), 5000); }
@@ -165,7 +166,7 @@ export default function StrategyPage() {
                                     className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all">
                                     <Plus className="w-4 h-4" /> Add Entry
                                 </button>
-                                <button onClick={triggerShuri} disabled={triggering}
+                                <button onClick={triggerAtlas} disabled={triggering}
                                     className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-black hover:bg-indigo-700 transition-all disabled:opacity-50">
                                     <Sparkles className="w-4 h-4" />
                                     {triggering ? "Generating..." : "Regenerate"}
@@ -219,7 +220,7 @@ export default function StrategyPage() {
                                     <div className="p-16 text-center text-slate-400">
                                         <Calendar className="w-12 h-12 mx-auto mb-3 opacity-20" />
                                         <p className="font-bold">No entries yet</p>
-                                        <p className="text-sm mt-1">Add manually or trigger Shuri</p>
+                                        <p className="text-sm mt-1">Add manually or trigger Atlas</p>
                                     </div>
                                 ) : (
                                     <table className="w-full text-left">

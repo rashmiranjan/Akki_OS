@@ -31,7 +31,7 @@ export const updateDraft = async (req: Request, res: Response) => {
             await logActivity(userId, 'atlas', 'trigger', `Draft ${id} approved â€” queued for publishing`);
             console.log(`ðŸš€ Draft ${id} approved â€” Atlas will publish`);
         } else if (status === 'rejected') {
-            await logActivity(userId, 'loki', 'update', `Draft ${id} rejected`);
+            await logActivity(userId, 'scribe', 'update', `Draft ${id} rejected`);
         }
 
         res.json({ success: true, item: updated });

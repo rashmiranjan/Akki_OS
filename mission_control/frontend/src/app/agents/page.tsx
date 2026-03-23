@@ -6,28 +6,13 @@ import { DashboardSidebar } from "@/components/organisms/DashboardSidebar";
 import { getLocalAuthToken } from "@/auth/localAuth";
 import { Bot, Zap, Cpu, Play, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PBOS_AGENTS, type PbosAgentDefinition } from "@/lib/pbos-agents";
 
-type Agent = {
-  id: string;
-  name: string;
+type Agent = PbosAgentDefinition & {
   emoji?: string;
-  role: string;
-  description: string;
-  status: 'online' | 'offline' | 'busy';
-  capabilities: string[];
 };
 
-const AGENTS: Agent[] = [
-  { id: 'jarvis', name: 'Jarvis', role: 'Orchestrator', description: 'Parses intent, delegates tasks, and coordinates the agent network.', status: 'online', capabilities: ['Intent Parsing', 'Task Delegation', 'System Orchestration'] },
-  { id: 'fury', name: 'Fury', role: 'Researcher', description: 'Autonomous web intel via Apify focusing on Reddit, LinkedIn, and X.', status: 'online', capabilities: ['Trend Detection', 'Market Research', 'Pain Point Extraction'] },
-  { id: 'shuri', name: 'Shuri', role: 'Strategist', description: 'Develops 7-day content calendars and campaign planning.', status: 'online', capabilities: ['Strategic Planning', 'Content Calendaring', 'Campaign Management'] },
-  { id: 'oracle', name: 'Oracle', role: 'Ideator', description: 'Creates hundreds of content ideas from research data.', status: 'online', capabilities: ['Brainstorming', 'Concept Generation', 'Trend Adaptation'] },
-  { id: 'loki', name: 'Loki', role: 'Writer', description: 'Generates high-performance LinkedIn and X posts.', status: 'online', capabilities: ['Copywriting', 'Voice Adaptation', 'Platform Optimization'] },
-  { id: 'vision', name: 'Vision', role: 'Visual Generator', description: 'Creates quote cards, diagrams, and video scripts.', status: 'online', capabilities: ['Visual Design', 'Diagramming', 'Creative Direction'] },
-  { id: 'atlas', name: 'Atlas', role: 'Distributor', description: 'Schedules and publishes posts to social platforms.', status: 'online', capabilities: ['Auto-Publishing', 'Multi-Platform Sync', 'Scheduling'] },
-  { id: 'echo', name: 'Echo', role: 'Engagement', description: 'Generates reply suggestions and hunts for conversations.', status: 'online', capabilities: ['Comment Analysis', 'Reply Generation', 'Social Listening'] },
-  { id: 'pulse', name: 'Pulse', role: 'Analytics', description: 'Weekly performance analysis and auto-evolution insights.', status: 'online', capabilities: ['Performance Tracking', 'Growth Analytics', 'Strategy Refinement'] },
-];
+const AGENTS: Agent[] = PBOS_AGENTS.map(({ icon, color, ...agent }) => agent);
 
 export default function AgentsPage() {
   const router = useRouter();

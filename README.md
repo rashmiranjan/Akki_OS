@@ -1,90 +1,86 @@
-# 🦅 Akki OS - Personal Branding Operating System
+# Akki OS
 
-> 24x7 autonomous AI system that manages your entire personal brand on LinkedIn & Twitter
+Akki OS is a Personal Branding OS built on top of OpenClaw. The repo packages the PB-OS domain model, a 7-agent cabinet, and Mission Control, then seeds a self-contained OpenClaw runtime for VPS use.
 
-## ⚡ Quick Start
+## Install
 ```bash
 git clone https://github.com/rashmiranjan/Akki_OS
 cd Akki_OS
 bash install.sh
 ```
 
-## 🔄 Upgrade
-```bash
-# Linux/macOS
-bash install.sh --upgrade --non-interactive
+Windows Command Prompt / PowerShell:
+```bat
+git clone https://github.com/rashmiranjan/Akki_OS
+cd Akki_OS
+install.bat
+```
 
-# Windows
+Upgrade an existing local install:
+```bash
+bash install.sh --upgrade --non-interactive
+```
+
+Windows upgrade:
+```bat
 install.bat --upgrade --non-interactive
 ```
 
-Dry run:
+Explicitly resync the live OpenClaw runtime from repo seed files:
 ```bash
-bash install.sh --upgrade --dry-run
+bash install.sh --upgrade --resync-runtime
 ```
 
-## 🤖 9 AI Agents
-
-| Agent | Role | Skill |
-|-------|------|-------|
-| 🦅 Jarvis | Orchestrator | All skills |
-| 🔍 Fury | Researcher | apify-research |
-| ✍️ Loki | Writer | linkedin-writer, twitter-writer |
-| 📊 Shuri | Strategist | strategy-planner |
-| 🚀 Atlas | Distributor | linkedin-post, twitter-post |
-| 💬 Echo | Engagement | engagement-hunter |
-| 💡 Oracle | Idea Generator | idea-generator |
-| 📈 Pulse | Analytics | analytics-reader |
-| 🎨 Vision | Visual Generator | browser-automation |
-
-## 🛠️ Skills
-
-| Skill | Purpose |
-|-------|---------|
-| apify-research | Market research (Reddit, LinkedIn, X) |
-| linkedin-writer | LinkedIn post writing |
-| twitter-writer | Twitter thread writing |
-| linkedin-post | Auto publish to LinkedIn |
-| twitter-post | Auto publish to Twitter |
-| idea-generator | Content ideas from research |
-| strategy-planner | 7-day content calendar |
-| engagement-hunter | Reply suggestions |
-| analytics-reader | Performance insights |
-| convex-save | Data storage |
-| webhook-server | Real-time notifications |
-| browser-automation | Browser control |
-| apify-scripts | Web scraping |
-| db-helpers | Database helpers |
-
-## 📋 Requirements
-
-- Node.js 18+
-- OpenClaw
-- Convex account (free)
-- Telegram Bot Token
-- Gemini API Key (free)
-- Apify account (free tier)
-
-## 🗄️ Database Setup
-
-Run `skills/convex-schema/schema.sql` in Convex SQL Editor
-
-## 🏗️ Architecture
-```
-Bootstrap Layer (Akki OS) -> OpenClaw Gateway + Agents + Webhook
-Operations Layer (Mission Control) -> API + Convex + Dashboard
+Windows runtime resync:
+```bat
+install.bat --upgrade --resync-runtime
 ```
 
-## 📁 Structure
-```
-akki-os/
-├── platform/
-│   ├── bootstrap/     # Installer + provisioning layer
-│   └── operations/    # Operations layer docs (mission_control runtime)
+## Runtime Model
+- The repo is the bootstrap source for agents, shared skills, and PB-OS domains.
+- OpenClaw keeps the live runtime in `~/.openclaw`.
+- Linux, macOS, and Windows installs are seeded into a self-contained runtime under `.openclaw/akki` so the running system does not depend on the repo checkout.
+- Shared global skills are mirrored into `~/.openclaw/skills`.
+- Normal upgrades preserve live OpenClaw state and only fill missing runtime pieces.
+
+Installer-managed runtime values are written to `.akki/runtime.env`.
+
+## PB-OS Agent Cabinet
+- Atlas: orchestration and project setup
+- Archivist: founder and product memory
+- Oracle: audience and market intelligence
+- Pulse: analytics and iteration
+- Scribe: narrative and draft production
+- Keith: distribution and network expansion
+- Sentinel: signal monitoring and resonance tracking
+
+## Repo Layout
+```text
+Akki_OS/
+├── agents/            # Bootstrap source for PB-OS agent workspaces
+├── domains/           # Bootstrap source for shared PB-OS domain assets
+├── workspace/         # Bootstrap source for shared OpenClaw workspace + packaged skills
 ├── mission_control/   # Backend + frontend control plane
-├── agents/            # OpenClaw agent workspaces
-├── skills/            # Reusable skill packs + scripts
-├── workspace/         # Shared OpenClaw workspace
-├── install.sh         # Bootstrap entrypoint
-└── .env.example       # Root env defaults
+├── platform/          # Bootstrap and operations docs
+├── tools/             # Installer support scripts
+├── install.sh         # Linux/macOS install/upgrade entrypoint
+├── install.bat        # Windows install/upgrade entrypoint
+└── start.bat          # Windows wrapper that delegates to install.bat
 ```
+
+## What The Installer Does
+- Ensures Node.js, Docker, and OpenClaw are available
+- Seeds a self-contained OpenClaw runtime under `~/.openclaw/akki`
+- Runs OpenClaw onboarding against the self-contained shared workspace
+- Registers the PB-OS agents against self-contained runtime workspaces
+- Seeds agent souls/identity files into OpenClaw-managed agent directories
+- Seeds shared/global skills and PB-OS domains into the self-contained runtime
+- Validates runtime provisioning, not just repo asset presence
+- Supports explicit runtime resync for live installs
+- Writes Mission Control environment values
+- Deploys Convex if credentials are provided
+- Starts Mission Control via Docker Compose
+
+## Notes
+- This repo now targets the PB-OS model, not the older 9-agent Akki layout.
+- If a shared external skill is still required, treat it as an explicit dependency and package it before relying on it in automation.

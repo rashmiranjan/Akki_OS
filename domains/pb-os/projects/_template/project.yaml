@@ -1,0 +1,12 @@
+id: <project-id>
+slug: <project-slug>
+name: <project-name>
+founder: <founder-name>
+product: <product-name>
+channels: []
+stage: onboarding
+status: active
+owners:
+  orchestrator: atlas
+  contributors: [archivist, oracle, pulse, scribe, keith, sentinel]
+created_by: atlas
