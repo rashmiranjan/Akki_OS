@@ -6,16 +6,10 @@ import { DashboardSidebar } from "@/components/organisms/DashboardSidebar";
 import { getLocalAuthToken } from "@/auth/localAuth";
 import { Bot, Zap, Cpu, Play, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { PBOS_AGENTS } from "@/lib/pbos-agents";
+import { PBOS_AGENTS, type PbosAgentDefinition } from "@/lib/pbos-agents";
 
-type Agent = {
-  id: string;
-  name: string;
+type Agent = PbosAgentDefinition & {
   emoji?: string;
-  role: string;
-  description: string;
-  status: 'online' | 'offline' | 'busy';
-  capabilities: string[];
 };
 
 const AGENTS: Agent[] = PBOS_AGENTS.map(({ icon, color, ...agent }) => agent);

@@ -1040,7 +1040,14 @@ fi
 # Start Docker — Convex ready hone ke baad
 cd "$OPERATIONS_DIR"
 $DOCKER_CMD compose -f compose.yml --env-file .env up -d --build
+COMPOSE_EXIT=$?
 cd "$SCRIPT_DIR"
+if [ $COMPOSE_EXIT -ne 0 ]; then
+    echo "ERROR: Mission Control Docker startup failed (docker compose exit code: $COMPOSE_EXIT)"
+    echo "Run from $OPERATIONS_DIR:"
+    echo "  $DOCKER_CMD compose -f compose.yml --env-file .env up --build"
+    exit $COMPOSE_EXIT
+fi
 echo "OK: Mission Control started!"
 
 echo ""

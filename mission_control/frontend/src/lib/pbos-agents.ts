@@ -119,4 +119,8 @@ export const PBOS_AGENTS = [
   },
 ] as const;
 
+export type PbosAgentDefinition = Omit<(typeof PBOS_AGENTS)[number], "icon" | "color"> & {
+  capabilities: readonly string[];
+};
+
 export const DEFAULT_AGENT_ICON = Bot;
