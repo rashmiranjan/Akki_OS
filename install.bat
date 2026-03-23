@@ -146,7 +146,7 @@ if /I "%DRY_RUN%"=="true" (
     echo ERROR: Dry-run requires OpenClaw already installed.
     exit /b 1
   )
-  openclaw --version >nul 2>&1
+  call openclaw --version >nul 2>&1
   if errorlevel 1 (
     echo ERROR: OpenClaw is on PATH but failed to run.
     exit /b 1
@@ -168,7 +168,7 @@ if /I "%DRY_RUN%"=="true" (
     pause
     exit /b 1
   )
-  openclaw --version >nul 2>&1
+  call openclaw --version >nul 2>&1
   if errorlevel 1 (
     echo ERROR: OpenClaw command exists but failed to run after install.
     pause
